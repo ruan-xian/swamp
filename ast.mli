@@ -1,8 +1,24 @@
-type operator = Add | Sub | Mul | Div
+type operator = Add | Sub | Mul | Div | Mod
 
 type expr =
-    Binop of expr * operator * expr
-  | Lit of int
-  | Seq of expr * expr
-  | Asn of string * expr
-  | Var of string
+  Infix of infixexp
+
+and infixexp = 
+    InfixOp of lexp * operator * infixexp
+  | InfixNegation of infixexp
+  | LetExpr of lexp
+
+and lexp =
+    LetExpr of decls * expr
+  | FunctionApp of fexp
+
+and decls =
+    Assign of string * expr
+
+and fexp =
+    ArgExp of aexp
+
+and aexp = 
+    Var of string
+  | IntLit of int
+  | ParenExp of expr

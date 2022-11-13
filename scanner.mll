@@ -25,6 +25,7 @@ let whitespace = whitestuff+
 
 rule tokenize = parse
     whitespace {tokenize lexbuf}
+(* special characters *)
   | ',' { COMMA }
   | ';' { SEMI }
   | ':' { COLON }
@@ -34,6 +35,22 @@ rule tokenize = parse
   | ']' { RBRACKET }
   | '{' { LBRACE }
   | '}' { RBRACE }
+(* operators *)
+  | '+' { PLUS }
+  | '-' { MINUS }
+  | '*' { MULT }
+  | '/' { DIV }
+  | '%' { MOD }
+  | "==" { EQUAL }
+  | "<=" { LEQ }
+  | ">=" { GEQ }
+  | "<" { LESS }
+  | ">" { GREATER }
+  | "!=" { NEQ }
+  | '=' { ASSIGN }
+(* keywords *)
+  | "IN" { IN }
+  | "LET" { LET }
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  
@@ -41,10 +58,3 @@ rule tokenize = parse
   | string as lexeme { STRINGLIT(lexeme) }
   | id as lexeme { ID(lexeme) }
   | eof { EOF }
-
-
-{
-	let buf = Lexing.from_channel stdin in
-	let f = tokenize buf in
-	print_endline f
-}
