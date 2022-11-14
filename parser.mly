@@ -29,11 +29,11 @@ infixexp:
   | lexp MULT infixexp { InfixOp($1, Mul, $3) }
   | lexp DIV infixexp { InfixOp($1, Div, $3) }
   | lexp MOD infixexp { InfixOp($1, Mod, $3) }
-  | lexp { LetExpr $1 }
+  | lexp { LetExpr1 $1 }
 // (* TODO: Unary Minus *)
 
 lexp:
-    LET decls IN expr { LetExpr($2, $4)}
+    LET decls IN expr { LetExpr2($2, $4)}
   | fexp { FunctionApp $1 }
 
 fexp:

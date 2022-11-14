@@ -3,21 +3,38 @@ open Ast
 module StringMap = Map.Make(String)
 let symbol_table = ref StringMap.empty
 
-let rec eval = function 
+let rec eval = function
+    Infix(x) -> eval_infixexp x
+
+and eval_infixexp = function
+    LetExpr1(x) -> eval_lexp x
+  | InfixOp(e1, op, e2) ->
+    let v1  = eval_lexp e1 in
+    let v2 = eval_infixexp e2 in
+    (match op with
+      Add -> v1 + v2
+    | Sub -> v1 - v2
+    | Mul -> v1 * v2
+    | Div -> v1 / v2
+    | Mod -> v1 mod v2)
+
+and eval_lexp = function
+    LetExpr2(decl, exp) -> eval_decls decl; eval exp
+  | FunctionApp(x) -> eval_fexp x
+
+and eval_fexp = function 
+    ArgExp(x) -> eval_aexp x
+
+and eval_aexp = function 
     IntLit(x)            -> x
   | Var(s)            -> StringMap.find s !symbol_table
-  | InfixOp(e1, op, e2) ->
-      let v1  = eval e1 in
-      let v2 = eval e2 in
-      (match op with
-        Add -> v1 + v2
-      | Sub -> v1 - v2
-      | Mul -> v1 * v2
-      | Div -> v1 / v2)
-  | Asn(s, e) ->
-      let value = eval e in
-      symbol_table := StringMap.add s value !symbol_table;
-      value
+  | ParenExp(x) -> eval x
+
+and eval_decls = function
+    Assign(id, exp) -> 
+      let value = eval exp in
+      symbol_table := StringMap.add id value !symbol_table;
+      ()
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in

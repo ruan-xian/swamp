@@ -5,11 +5,11 @@ type expr =
 
 and infixexp = 
     InfixOp of lexp * operator * infixexp
-  | InfixNegation of infixexp
-  | LetExpr of lexp
+  (* | InfixNegation of infixexp *)
+  | LetExpr1 of lexp
 
 and lexp =
-    LetExpr of decls * expr
+    LetExpr2 of decls * expr
   | FunctionApp of fexp
 
 and decls =
