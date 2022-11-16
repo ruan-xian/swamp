@@ -29,7 +29,7 @@ scanner.ml : scanner.mll
 	ocamllex $^
 
 parser.ml parser.mli : parser.mly
-	ocamlyacc $^
+	ocamlyacc -v $^
 
 calc.out : calc calc.tb
 	./calc < calc.tb > calc.out
