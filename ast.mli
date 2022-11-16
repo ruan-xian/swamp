@@ -13,7 +13,7 @@ and infixexp =
   (* | FunctionApp of fexp *)
 
 and decls =
-    Assign of string * infixexp
+    Assign of string * expr
 
 and fexp =
     ArgExp of aexp

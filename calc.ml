@@ -33,7 +33,7 @@ and eval_aexp = function
 
 and eval_decls = function
     Assign(id, exp) -> 
-      let value = eval_infixexp exp in
+      let value = eval exp in
       symbol_table := StringMap.add id value !symbol_table;
       ()
 

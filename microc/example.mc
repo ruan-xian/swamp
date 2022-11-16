@@ -11,13 +11,13 @@ int gcd(int a, int b) {
 }
 
 int main() {
-  int x;
+  int elser;
   int y;
   a = 18;
   b = 9;
-  x = 2;
+  elser = 2;
   y = 14;
-  print(gcd(x,y));
+  print(gcd(elser,y));
   print(gcd(3,15));
   print(gcd(99,121));
   print(gcd(a,b));

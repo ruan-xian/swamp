@@ -49,8 +49,8 @@ rule tokenize = parse
   | "!=" { NEQ }
   | '=' { ASSIGN }
 (* keywords *)
-  | "IN" { IN }
-  | "LET" { LET }
+  | "in" { IN }
+  | "let" { LET }
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  

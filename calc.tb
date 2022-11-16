@@ -1,1 +1,5 @@
-LET a = 5 IN a + 2
+0=| should evaluate to 9 |=0
+0=| tests let statements |=0
+0=| should NOT pass after we do scoping |=0
+0=| because y should not be defined for the last expression |=0
+let x = let y = 3 in y in x * y

@@ -50,4 +50,4 @@ aexp:
   | LPAREN expr RPAREN { ParenExp $2 }
 
 decls:
-    ID ASSIGN cinfixexp { Assign($1, $3) }
+    ID ASSIGN expr { Assign($1, $3) }
