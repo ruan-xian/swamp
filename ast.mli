@@ -4,16 +4,16 @@ type expr =
   Infix of infixexp
 
 and infixexp = 
-    InfixOp of lexp * operator * infixexp
-  (* | InfixNegation of infixexp *)
-  | LetExpr1 of lexp
-
-and lexp =
-    LetExpr2 of decls * expr
+  InfixOp of infixexp * operator * infixexp
+  | LetExpr2 of decls * expr
   | FunctionApp of fexp
 
+(* and lexp =
+    LetExpr2 of decls * expr *)
+  (* | FunctionApp of fexp *)
+
 and decls =
-    Assign of string * expr
+    Assign of string * infixexp
 
 and fexp =
     ArgExp of aexp
