@@ -5,20 +5,13 @@ type expr =
 
 and infixexp = 
   InfixOp of infixexp * operator * infixexp
-  | LetExpr2 of decls * expr
   | FunctionApp of fexp
 
-(* and lexp =
-    LetExpr2 of decls * expr *)
-  (* | FunctionApp of fexp *)
-
-and decls =
-    Assign of string * expr
-
-and fexp =
+and fexp = (* function application *)
     ArgExp of aexp
 
-and aexp = 
+and aexp = (* atomic expression *)
     Var of string
   | IntLit of int
   | ParenExp of expr
+  | Assign of string * expr * infixexp

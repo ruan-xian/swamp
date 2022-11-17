@@ -10,6 +10,7 @@
 %token <char> CHARLIT
 
 // %left SEMICOLON
+%left IN
 %right ASSIGN
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -39,7 +40,6 @@ dinfixexp:
   | cinfixexp MULT dinfixexp { InfixOp($1, Mul, $3) }
   | cinfixexp DIV dinfixexp { InfixOp($1, Div, $3) }
   | cinfixexp MOD dinfixexp { InfixOp($1, Mod, $3) }
-  | LET decls IN expr { LetExpr2($2, $4)}
 
 fexp:
     aexp { ArgExp $1 }
@@ -48,6 +48,4 @@ aexp:
     INTLIT { IntLit $1 }
   | ID { Var $1 }
   | LPAREN expr RPAREN { ParenExp $2 }
-
-decls:
-    ID ASSIGN expr { Assign($1, $3) }
+  | LET ID ASSIGN expr IN cinfixexp { Assign($2, $4, $6) }
