@@ -1,4 +1,4 @@
-all : calc.out
+all : clean calc.out
 
 ##############################
 #
