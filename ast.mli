@@ -6,6 +6,7 @@ type program =
 and expr =
     CondExp of expr * expr * expr
   | InfixExp of infixexp
+  | Assign of string * expr * expr 
 
 and infixexp =
     ArgExp of aexp
@@ -14,6 +15,7 @@ and infixexp =
 and aexp = (* atomic expression *)
     Var of string
   | IntLit of int
-  | Assign of string * aexp * aexp
+  | ParenExp of expr
+
 
   

@@ -12,6 +12,10 @@ and eval symbol_table = function
       0 -> eval symbol_table e2
     | _ -> eval symbol_table e1)
   | InfixExp(x) -> eval_infixexp symbol_table x
+  | Assign(id, exp, exp2) -> 
+    let value = eval symbol_table exp in
+      let new_symbol_table = StringMap.add id value symbol_table in
+        eval new_symbol_table exp2
 
 and eval_infixexp symbol_table = function
     ArgExp(x) -> eval_aexp symbol_table x
@@ -28,10 +32,7 @@ and eval_infixexp symbol_table = function
 and eval_aexp symbol_table = function 
     IntLit(x)            -> x
   | Var(s)            -> StringMap.find s symbol_table
-  | Assign(id, exp, exp2) -> 
-    let value = eval_aexp symbol_table exp in
-      let new_symbol_table = StringMap.add id value symbol_table in
-        eval_aexp new_symbol_table exp2
+  | ParenExp(e)       -> eval symbol_table e
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
