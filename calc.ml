@@ -4,31 +4,24 @@ module StringMap = Map.Make(String)
 let symbol_table = ref StringMap.empty
 
 let rec eval = function
-  Infix(x) -> eval_infixexp x
+  ArgExp(x) -> eval_aexp x
 
-and eval_infixexp = function
-    FunctionApp(x) -> eval_fexp x
+and eval_aexp = function 
+    IntLit(x)            -> x
+  | Var(s)            -> StringMap.find s !symbol_table
+  | Assign(id, exp, exp2) -> 
+    let value = eval_aexp exp in
+    symbol_table := StringMap.add id value !symbol_table;
+    eval_aexp exp2
   | InfixOp(e1, op, e2) ->
-    let v1  = eval_infixexp e1 in
-    let v2 = eval_infixexp e2 in
+    let v1  = eval_aexp e1 in
+    let v2 = eval_aexp e2 in
     (match op with
       Add -> v1 + v2
     | Sub -> v1 - v2
     | Mul -> v1 * v2
     | Div -> v1 / v2
     | Mod -> v1 mod v2)
-
-and eval_fexp = function 
-    ArgExp(x) -> eval_aexp x
-
-and eval_aexp = function 
-    IntLit(x)            -> x
-  | Var(s)            -> StringMap.find s !symbol_table
-  | ParenExp(x) -> eval x
-  | Assign(id, exp, exp2) -> 
-    let value = eval exp in
-    symbol_table := StringMap.add id value !symbol_table;
-    eval_infixexp exp2
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in

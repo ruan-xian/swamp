@@ -22,30 +22,15 @@
 %%
 
 expr:
-  cinfixexp { Infix $1 }
-  | dinfixexp { Infix $1 }
-
-cinfixexp:
-    cinfixexp PLUS cinfixexp { InfixOp($1, Add, $3) }
-  | cinfixexp MINUS cinfixexp { InfixOp($1, Sub, $3) }
-  | cinfixexp MULT cinfixexp { InfixOp($1, Mul, $3) }
-  | cinfixexp DIV cinfixexp { InfixOp($1, Div, $3) }
-  | cinfixexp MOD cinfixexp { InfixOp($1, Mod, $3) }
-  | fexp { FunctionApp $1 }
-// (* TODO: Unary Minus *)
-
-dinfixexp: 
-    cinfixexp PLUS dinfixexp { InfixOp($1, Add, $3) }
-  | cinfixexp MINUS dinfixexp { InfixOp($1, Sub, $3) }
-  | cinfixexp MULT dinfixexp { InfixOp($1, Mul, $3) }
-  | cinfixexp DIV dinfixexp { InfixOp($1, Div, $3) }
-  | cinfixexp MOD dinfixexp { InfixOp($1, Mod, $3) }
-
-fexp:
     aexp { ArgExp $1 }
   
 aexp:
     INTLIT { IntLit $1 }
   | ID { Var $1 }
-  | LPAREN expr RPAREN { ParenExp $2 }
-  | LET ID ASSIGN expr IN cinfixexp { Assign($2, $4, $6) }
+  | LPAREN aexp RPAREN { $2 }
+  | LET ID ASSIGN aexp IN aexp { Assign($2, $4, $6) }
+  | aexp PLUS aexp { InfixOp($1, Add, $3) }
+  | aexp MINUS aexp { InfixOp($1, Sub, $3) }
+  | aexp MULT aexp { InfixOp($1, Mul, $3) }
+  | aexp DIV aexp { InfixOp($1, Div, $3) }
+  | aexp MOD aexp { InfixOp($1, Mod, $3) }
