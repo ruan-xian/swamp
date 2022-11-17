@@ -15,11 +15,14 @@
 %left PLUS MINUS
 %left MULT DIV MOD
 
-%start expr
-%type <Ast.expr> expr
+%start program
+%type <Ast.program> program
 
 // %%
 %%
+
+program:
+    expr EOF { Expr $1 }
 
 expr:
     aexp { ArgExp $1 }

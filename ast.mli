@@ -1,6 +1,9 @@
 type operator = Add | Sub | Mul | Div | Mod
 
-type expr =
+type program =
+  Expr of expr
+
+and expr =
   ArgExp of aexp
 
 and aexp = (* atomic expression *)
