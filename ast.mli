@@ -1,6 +1,9 @@
 type operator = Add | Sub | Mul | Div | Mod
 
-type expr =
+type program =
+    Expr of expr
+
+and expr =
     CondExp of expr * expr * expr
   | InfixExp of infixexp
 
