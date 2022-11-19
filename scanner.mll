@@ -51,6 +51,9 @@ rule tokenize = parse
 (* keywords *)
   | "in" { IN }
   | "let" { LET }
+  | "if" { IF }
+  | "then" { THEN }
+  | "else" { ELSE }
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  

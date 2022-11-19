@@ -1,24 +1,21 @@
 type operator = Add | Sub | Mul | Div | Mod
 
-type expr =
-  Infix of infixexp
+type program =
+    Expr of expr
 
-and infixexp = 
-  InfixOp of infixexp * operator * infixexp
-  | LetExpr2 of decls * expr
-  | FunctionApp of fexp
+and expr =
+    CondExp of expr * expr * expr
+  | InfixExp of infixexp
+  | Assign of string * expr * expr 
 
-(* and lexp =
-    LetExpr2 of decls * expr *)
-  (* | FunctionApp of fexp *)
-
-and decls =
-    Assign of string * expr
-
-and fexp =
+and infixexp =
     ArgExp of aexp
+  | InfixOp of infixexp * operator * infixexp
 
-and aexp = 
+and aexp = (* atomic expression *)
     Var of string
   | IntLit of int
   | ParenExp of expr
+
+
+  

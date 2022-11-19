@@ -1,4 +1,4 @@
-all : calc.out
+all : clean calc.out
 
 ##############################
 #
@@ -15,6 +15,8 @@ all : calc.out
 # your executable successfully, the output of test case will be 
 # generate automatically in a file named calc.out
 
+test: clean calc
+	sh run_tests.sh
 
 calc : parser.cmo scanner.cmo calc.cmo
 	ocamlc -w A -o calc $^

@@ -1,0 +1,6 @@
+0=| Expected value: not_found |=0
+0=| should fail with error _not_found (originally passed with 9) |=0
+0=| tests let statements |=0
+0=| should NOT pass after we do scoping |=0
+0=| because y should not be defined for the last expression |=0
+let x = let y = 3 in y in x * y
