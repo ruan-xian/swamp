@@ -41,4 +41,4 @@ let rec string_of_expr = function
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
 
 let string_of_prog = function 
-  Expr(e) -> "\n\nParsed program: \n\n" ^ string_of_expr e 
+  Expr(e) -> "Parsed program: \n\t" ^ string_of_expr e 
