@@ -36,9 +36,6 @@ expr:
   
 aexp:
     INTLIT { IntLit $1 }
-  | FLOATLIT { FloatLit $1 }
-  | STRINGLIT { StringLit $1 }
-  | CHARLIT { CharLit $1 }
   | ID { Var $1 }
   | LPAREN expr RPAREN { ParenExp $2 }
 

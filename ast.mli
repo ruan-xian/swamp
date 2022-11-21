@@ -15,9 +15,6 @@ and infixexp =
 and aexp = (* atomic expression *)
     Var of string
   | IntLit of int
-  | FloatLit of float
-  | StringLit of string
-  | CharLit of char
   | ParenExp of expr
 
 
