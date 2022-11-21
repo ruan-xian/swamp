@@ -61,3 +61,4 @@ rule tokenize = parse
   | string as lexeme { STRINGLIT(lexeme) }
   | id as lexeme { ID(lexeme) }
   | eof { EOF }
+  | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
