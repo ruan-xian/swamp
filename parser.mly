@@ -14,9 +14,11 @@
 
 // %left SEMICOLON
 %left IN
-%right ASSIGN
 %left OR AND NOT
 %left EQUAL GREATER LESS LEQ GEQ NEQ
+%left ELSE
+
+%right ASSIGN
 %left PLUS MINUS
 %left MULT DIV MOD
 
@@ -30,25 +32,19 @@ program:
     expr EOF { Expr $1 }
 
 expr:
-    lexp PLUS expr { InfixOp($1, Add, $3) }
-  | lexp MINUS expr { InfixOp($1, Sub, $3) }
-  | lexp MULT expr { InfixOp($1, Mul, $3) }
-  | lexp DIV expr { InfixOp($1, Div, $3) }
-  | lexp MOD expr { InfixOp($1, Mod, $3) }
-  | lexp EQUAL expr { InfixOp($1, Eq, $3) }
-  | lexp GREATER expr { InfixOp($1, Greater, $3) }
-  | lexp GEQ expr { InfixOp($1, Geq, $3) }
-  | lexp LESS expr { InfixOp($1, Less, $3) }
-  | lexp LEQ expr { InfixOp($1, Leq, $3) }
-  | lexp NEQ expr { InfixOp($1, Neq, $3) }
-  | lexp { LeftExp $1 }
-
-lexp:
     IF expr THEN expr ELSE expr { CondExp($2, $4, $6) }
   | LET ID ASSIGN expr IN expr { Assign($2, $4, $6) }
-  | aexp { ArgExp $1 }
-  
-aexp:
-    INTLIT { IntLit $1 }
+  | expr PLUS expr { InfixOp($1, Add, $3) }
+  | expr MINUS expr { InfixOp($1, Sub, $3) }
+  | expr MULT expr { InfixOp($1, Mul, $3) }
+  | expr DIV expr { InfixOp($1, Div, $3) }
+  | expr MOD expr { InfixOp($1, Mod, $3) }
+  | expr EQUAL expr { InfixOp($1, Eq, $3) }
+  | expr GREATER expr { InfixOp($1, Greater, $3) }
+  | expr GEQ expr { InfixOp($1, Geq, $3) }
+  | expr LESS expr { InfixOp($1, Less, $3) }
+  | expr LEQ expr { InfixOp($1, Leq, $3) }
+  | expr NEQ expr { InfixOp($1, Neq, $3) }
+  | INTLIT { IntLit $1 }
   | ID { Var $1 }
-  | LPAREN expr RPAREN { ParenExp $2 }
+  | LPAREN expr RPAREN { $2 }
