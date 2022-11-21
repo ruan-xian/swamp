@@ -2,12 +2,13 @@ open Ast
 
 module StringMap = Map.Make(String)
 
-let rec eval_all = function
+type typ = Int | Bool | Float | String| Char
+
+let rec eval_all : typ = function
   Expr(x) -> 
     let symbol_table = StringMap.empty in eval symbol_table x
 
-
-and eval symbol_table = function
+and eval symbol_table : typ = function
       CondExp(cond, e1, e2) -> 
         (match eval symbol_table cond with 
           0 -> eval symbol_table e2
@@ -31,10 +32,10 @@ and eval symbol_table = function
         | Geq -> if v1 >= v2 then 1 else 0
         | Less -> if v1 < v2 then 1 else 0
         | Leq -> if v1 <= v2 then 1 else 0)
-    | IntLit(x) -> x
-    | FloatLit(x) -> x
-    | StringLit(x) -> x
-    | CharLit(x) -> x
+    | IntLit(x) -> Int x
+    | FloatLit(x) ->Float x
+    | StringLit(x) -> String x
+    | CharLit(x) -> Char x
     | Var(s) -> StringMap.find s symbol_table
 
 let _ =

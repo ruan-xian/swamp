@@ -4,10 +4,11 @@
 %token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
-%token TLIT FLIT AND OR NOT
+%token AND OR NOT
 %token TYPE INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE
 
 %token <int> INTLIT
+%token <bool> BOOLLIT
 %token <float> FLOATLIT
 %token <string> ID STRINGLIT
 %token <char> CHARLIT
@@ -55,9 +56,13 @@ expr:
   | expr LESS expr { InfixOp($1, Less, $3) }
   | expr LEQ expr { InfixOp($1, Leq, $3) }
   | expr NEQ expr { InfixOp($1, Neq, $3) }
+  | expr AND expr { InfixOp($1, And, $3) }
+  | expr OR expr { InfixOp($1, Or, $3) }
+  | expr NOT expr { InfixOp($1, Not, $3) }
 
     // Literals
   | INTLIT { IntLit $1 }
+  | BOOLLIT { BoolLit $1 }
   | FLOATLIT { FloatLit $1 }
   | STRINGLIT { StringLit $1 }
   | CHARLIT { CharLit $1 }
