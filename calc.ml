@@ -27,7 +27,14 @@ and eval_infixexp symbol_table = function
     | Sub -> v1 - v2
     | Mul -> v1 * v2
     | Div -> v1 / v2
-    | Mod -> v1 mod v2)
+    | Mod -> v1 mod v2
+    | Eq -> if v1 = v2 then 1 else 0
+    | Neq -> if v1 != v2 then 1 else 0
+    | Greater -> if v1 > v2 then 1 else 0
+    | Geq -> if v1 >= v2 then 1 else 0
+    | Less -> if v1 < v2 then 1 else 0
+    | Leq -> if v1 <= v2 then 1 else 0
+    )
 
 and eval_aexp symbol_table = function 
     IntLit(x)            -> x

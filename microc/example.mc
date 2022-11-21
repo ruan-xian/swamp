@@ -12,6 +12,7 @@ int gcd(int a, int b) {
 
 int main() {
   int elser;
+  print(1);
   int y;
   a = 18;
   b = 9;

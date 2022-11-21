@@ -15,6 +15,7 @@
 // %left SEMICOLON
 %left IN
 %right ASSIGN
+%left EQUAL GREATER LESS LEQ GEQ NEQ
 %left PLUS MINUS
 %left MULT DIV MOD
 
@@ -44,6 +45,12 @@ cinfixexp:
   | cinfixexp MULT cinfixexp { InfixOp($1, Mul, $3) }
   | cinfixexp DIV cinfixexp { InfixOp($1, Div, $3) }
   | cinfixexp MOD cinfixexp { InfixOp($1, Mod, $3) }
+  | cinfixexp EQUAL cinfixexp { InfixOp($1, Eq, $3) }
+  | cinfixexp GREATER cinfixexp { InfixOp($1, Greater, $3) }
+  | cinfixexp GEQ cinfixexp { InfixOp($1, Geq, $3) }
+  | cinfixexp LESS cinfixexp { InfixOp($1, Less, $3) }
+  | cinfixexp LEQ cinfixexp { InfixOp($1, Leq, $3) }
+  | cinfixexp NEQ cinfixexp { InfixOp($1, Neq, $3) }
   | aexp { ArgExp $1 }
 
 dinfixexp: 
@@ -52,4 +59,10 @@ dinfixexp:
   | cinfixexp MULT dinfixexp { InfixOp($1, Mul, $3) }
   | cinfixexp DIV dinfixexp { InfixOp($1, Div, $3) }
   | cinfixexp MOD dinfixexp { InfixOp($1, Mod, $3) }
+  | cinfixexp EQUAL dinfixexp { InfixOp($1, Eq, $3) }
+  | cinfixexp GREATER dinfixexp { InfixOp($1, Greater, $3) }
+  | cinfixexp GEQ dinfixexp { InfixOp($1, Geq, $3) }
+  | cinfixexp LESS dinfixexp { InfixOp($1, Less, $3) }
+  | cinfixexp LEQ dinfixexp { InfixOp($1, Leq, $3) }
+  | cinfixexp NEQ dinfixexp { InfixOp($1, Neq, $3) }
   

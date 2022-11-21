@@ -1,4 +1,4 @@
-type operator = Add | Sub | Mul | Div | Mod
+type operator = Add | Sub | Mul | Div | Mod | Eq | Less | Greater | Geq | Leq | Neq
 
 type program =
     Expr of expr
