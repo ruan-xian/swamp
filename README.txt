@@ -28,6 +28,25 @@
 	all the files and runs the run_tests.sh script. The script will display expected
 	output as well as actual output (which may be an error).
 
+	Here is some sample output; depending on your bash interpreter it may or may not look different.
+	
+> sh run_tests.sh
+bad_assignment.swamp
+        0=| Expected value: not_found |=0
+        Fatal error: exception Not_found
+bad_lex.swamp
+        0=| Expected value: Illegal character ^ |=0
+        Fatal error: exception Failure("illegal character ^")
+bad_parse_assignment.swamp
+        0=| Expected value: Parse_error |=0
+        Fatal error: exception Stdlib.Parsing.Parse_error
+bad_parse_conditional_no_else.swamp
+        0=| Expected value: Parse_error |=0
+        Fatal error: exception Stdlib.Parsing.Parse_error
+conditional.swamp
+        0=| Expected value: 18216 |=0
+        18216
+
 	To print out the parsed programs, you can type "make print_test" from the base directory. 
 	This makes print_test.native and runs the run_print_tests.sh script. The script will display 
 	the name of the program, the program itself, and either the parsed program or a fatal_error if 
