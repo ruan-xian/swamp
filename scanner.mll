@@ -28,7 +28,6 @@ rule tokenize = parse
 (* special characters *)
   | ',' { COMMA }
   | ';' { SEMI }
-  | ':' { COLON }
   | '(' { LPAREN }
   | ')' { RPAREN }
   | '[' { LBRACKET }
@@ -48,6 +47,11 @@ rule tokenize = parse
   | ">" { GREATER }
   | "!=" { NEQ }
   | '=' { ASSIGN }
+(* list operators *)
+  | "@" { CAT }
+  | "::" { CONS }
+  | "head" { HEAD }
+  | "tail" { TAIL }
 (* boolean operators *)
   | "and" { AND }
   | "or" { OR }
