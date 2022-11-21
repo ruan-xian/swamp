@@ -60,4 +60,4 @@ expr:
   | INTLIT { IntLit $1 }
 
     // Parenthesized Expressions
-  | LPAREN expr RPAREN { $2 }
+  | LPAREN expr RPAREN { ParenExp($2) }
