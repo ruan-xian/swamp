@@ -32,6 +32,7 @@ and eval symbol_table = function
         | Leq -> if v1 <= v2 then 1 else 0)
     | IntLit(x) -> x
     | Var(s) -> StringMap.find s symbol_table
+    | ParenExp(e) -> eval symbol_table e
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
