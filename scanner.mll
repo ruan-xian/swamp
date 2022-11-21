@@ -48,12 +48,35 @@ rule tokenize = parse
   | ">" { GREATER }
   | "!=" { NEQ }
   | '=' { ASSIGN }
+(* boolean operators *)
+  | "and" { AND }
+  | "or" { OR }
+  | "not" { NOT }
 (* keywords *)
   | "in" { IN }
   | "let" { LET }
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "where" { WHERE }
+  | "for" { FOR }
+  | "by" { BY }
+  | "type" { TYPE }
+  | "over" { OVER }
+  | "onion" { ONION }
+  | "strict" { STRICT }
+  | "fun" { FUN }
+  | "None" { NONE }
+  | "_" { WILDCARD }
+(* boolean literals *)
+  | "True" { TLIT }
+  | "False" { FLIT }
+(* types *)
+  | "int" { INTTYPE }
+  | "float" { FLOATTYPE }
+  | "char" { CHARTYPE }
+  | "string" { STRTYPE }
+  | "bool" { BOOLTYPE }
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  
