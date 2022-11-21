@@ -1,8 +1,8 @@
 for filename in `ls ./test_cases | grep .swamp`
 do
 	echo $filename
-	echo -en "\t"
+	printf "\t"
 	cat "./test_cases/${filename}" | grep "Expected value:"
-	echo -en "\t"
+	printf "\t"
 	./calc < "./test_cases/${filename}"
 done
