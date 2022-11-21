@@ -4,13 +4,13 @@ type program =
     Expr of expr
 
 and expr =
-    CondExp of expr * expr * expr
-  | InfixExp of infixexp
-  | Assign of string * expr * expr 
+    InfixOp of lexp * operator * expr
+  | LeftExp of lexp
 
-and infixexp =
-    ArgExp of aexp
-  | InfixOp of infixexp * operator * infixexp
+and lexp =
+    CondExp of expr * expr * expr
+  | Assign of string * expr * expr 
+  | ArgExp of aexp
 
 and aexp = (* atomic expression *)
     Var of string

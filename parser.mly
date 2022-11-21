@@ -15,6 +15,7 @@
 // %left SEMICOLON
 %left IN
 %right ASSIGN
+%left OR AND NOT
 %left EQUAL GREATER LESS LEQ GEQ NEQ
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -29,40 +30,25 @@ program:
     expr EOF { Expr $1 }
 
 expr:
-    cinfixexp { InfixExp $1 }
-  | dinfixexp { InfixExp $1 }
-  | IF expr THEN expr ELSE expr { CondExp($2, $4, $6) }
+    lexp PLUS expr { InfixOp($1, Add, $3) }
+  | lexp MINUS expr { InfixOp($1, Sub, $3) }
+  | lexp MULT expr { InfixOp($1, Mul, $3) }
+  | lexp DIV expr { InfixOp($1, Div, $3) }
+  | lexp MOD expr { InfixOp($1, Mod, $3) }
+  | lexp EQUAL expr { InfixOp($1, Eq, $3) }
+  | lexp GREATER expr { InfixOp($1, Greater, $3) }
+  | lexp GEQ expr { InfixOp($1, Geq, $3) }
+  | lexp LESS expr { InfixOp($1, Less, $3) }
+  | lexp LEQ expr { InfixOp($1, Leq, $3) }
+  | lexp NEQ expr { InfixOp($1, Neq, $3) }
+  | lexp { LeftExp $1 }
+
+lexp:
+    IF expr THEN expr ELSE expr { CondExp($2, $4, $6) }
   | LET ID ASSIGN expr IN expr { Assign($2, $4, $6) }
+  | aexp { ArgExp $1 }
   
 aexp:
     INTLIT { IntLit $1 }
   | ID { Var $1 }
   | LPAREN expr RPAREN { ParenExp $2 }
-
-cinfixexp: 
-  | cinfixexp PLUS cinfixexp { InfixOp($1, Add, $3) }
-  | cinfixexp MINUS cinfixexp { InfixOp($1, Sub, $3) }
-  | cinfixexp MULT cinfixexp { InfixOp($1, Mul, $3) }
-  | cinfixexp DIV cinfixexp { InfixOp($1, Div, $3) }
-  | cinfixexp MOD cinfixexp { InfixOp($1, Mod, $3) }
-  | cinfixexp EQUAL cinfixexp { InfixOp($1, Eq, $3) }
-  | cinfixexp GREATER cinfixexp { InfixOp($1, Greater, $3) }
-  | cinfixexp GEQ cinfixexp { InfixOp($1, Geq, $3) }
-  | cinfixexp LESS cinfixexp { InfixOp($1, Less, $3) }
-  | cinfixexp LEQ cinfixexp { InfixOp($1, Leq, $3) }
-  | cinfixexp NEQ cinfixexp { InfixOp($1, Neq, $3) }
-  | aexp { ArgExp $1 }
-
-dinfixexp: 
-  | cinfixexp PLUS dinfixexp { InfixOp($1, Add, $3) }
-  | cinfixexp MINUS dinfixexp { InfixOp($1, Sub, $3) }
-  | cinfixexp MULT dinfixexp { InfixOp($1, Mul, $3) }
-  | cinfixexp DIV dinfixexp { InfixOp($1, Div, $3) }
-  | cinfixexp MOD dinfixexp { InfixOp($1, Mod, $3) }
-  | cinfixexp EQUAL dinfixexp { InfixOp($1, Eq, $3) }
-  | cinfixexp GREATER dinfixexp { InfixOp($1, Greater, $3) }
-  | cinfixexp GEQ dinfixexp { InfixOp($1, Geq, $3) }
-  | cinfixexp LESS dinfixexp { InfixOp($1, Less, $3) }
-  | cinfixexp LEQ dinfixexp { InfixOp($1, Leq, $3) }
-  | cinfixexp NEQ dinfixexp { InfixOp($1, Neq, $3) }
-  
