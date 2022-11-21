@@ -43,7 +43,7 @@
 5.	Team member contributions:
 	Ryan Xu (rx2189):
 		Lexing (except keywords)
-		Parser foundations and grammar rework (Ellen you should put grammar rework in your section too)
+		Parser foundations + operators (arithmetic and boolean)
 		Testing framework (calc.ml, run_tests.sh, test cases)
 		Variable scoping
 	Ken Miura (km3635):
