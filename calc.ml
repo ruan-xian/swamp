@@ -29,7 +29,8 @@ and eval symbol_table = function
         | Greater -> if v1 > v2 then 1 else 0
         | Geq -> if v1 >= v2 then 1 else 0
         | Less -> if v1 < v2 then 1 else 0
-        | Leq -> if v1 <= v2 then 1 else 0)
+        | Leq -> if v1 <= v2 then 1 else 0
+        )
     | IntLit(x) -> x
     | Var(s) -> StringMap.find s symbol_table
     | ParenExp(e) -> eval symbol_table e
