@@ -46,3 +46,7 @@
 		Parser foundations and grammar rework (Ellen you should put grammar rework in your section too)
 		Testing framework (calc.ml, run_tests.sh, test cases)
 		Variable scoping
+	Ken Miura (km3635):
+		Keyword lexing
+		Refined reworked grammar to remove redundancies 
+		Fixed parser and testing framework to work with updated grammar
