@@ -8,7 +8,7 @@
 1.	Our file structure consists of three main files:
 		scanner.mll
 		parser.mly
-		ast.mli			(ALICE CHANGE THIS TO AST.ML ONCE YOU DO PRINTING)
+		ast.ml
 	In addition, we have a Makefile and some testing files:
 		test_cases/		(folder containing test files)
 		run_tests.sh	(bash script to run all tests)
