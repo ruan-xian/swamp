@@ -32,23 +32,23 @@ program:
     expr EOF { Expr $1 }
 
 expr:
-    (* Conditional *)
+    // Conditional
     IF expr THEN expr ELSE expr { CondExp($2, $4, $6) }
       
-    (* Let Expression *)
+    // Let Expression
   | LET ID ASSIGN expr IN expr { Assign($2, $4, $6) }
 
-    (* Variable *)
+    // Variable
   | ID { Var $1 }
 
-    (* Arithmetic Operations *)
+    // Arithmetic Operations
   | expr PLUS expr { InfixOp($1, Add, $3) }
   | expr MINUS expr { InfixOp($1, Sub, $3) }
   | expr MULT expr { InfixOp($1, Mul, $3) }
   | expr DIV expr { InfixOp($1, Div, $3) }
   | expr MOD expr { InfixOp($1, Mod, $3) }
 
-    (* Boolean Operations *)
+    // Boolean Operations
   | expr EQUAL expr { InfixOp($1, Eq, $3) }
   | expr GREATER expr { InfixOp($1, Greater, $3) }
   | expr GEQ expr { InfixOp($1, Geq, $3) }
@@ -56,8 +56,8 @@ expr:
   | expr LEQ expr { InfixOp($1, Leq, $3) }
   | expr NEQ expr { InfixOp($1, Neq, $3) }
 
-    (* Literals *)
+    // Literals
   | INTLIT { IntLit $1 }
 
-    (* Parenthesized Expressions *)
+    // Parenthesized Expressions
   | LPAREN expr RPAREN { $2 }
