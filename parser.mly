@@ -4,7 +4,7 @@
 %token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
-%token AND OR NOT
+%token AND OR NOT UMINUS
 %token TYPE INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE
 
 %token <int> INTLIT
@@ -58,7 +58,10 @@ expr:
   | expr NEQ expr { InfixOp($1, Neq, $3) }
   | expr AND expr { InfixOp($1, And, $3) }
   | expr OR expr { InfixOp($1, Or, $3) }
-  | expr NOT expr { InfixOp($1, Not, $3) }
+
+    // Urnary Operations
+  | NOT expr { UnaryOp(Not, $2) }
+  | MINUS expr %prec UMINUS { UnaryOp(UMinus, $2) }
 
     // Literals
   | INTLIT { IntLit $1 }
