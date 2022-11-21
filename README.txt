@@ -24,11 +24,14 @@
 		microc/
 		hw2Q1/
 
-2.	To run our tests, you can type "make test" from the base directory. This makes
+2.	To run our calc tests, you can type "make test" from the base directory. This makes
 	all the files and runs the run_tests.sh script. The script will display expected
 	output as well as actual output (which may be an error).
 
-	ALICE ONCE YOU ADD PRINTING ALSO DETAIL HOW WE CAN PRINT THE LEXED AND PARSED OUTPUT 
+	To print out the parsed programs, you can type "make print_test" from the base directory. 
+	This makes print_test.native and runs the run_print_tests.sh script. The script will display 
+	the name of the program, the program itself, and either the parsed program or a fatal_error if 
+	the program cannot be parsed. 
 
 3.	Currently, we support the following features:
 		int, float, char, and string types and literals
@@ -50,3 +53,8 @@
 		Keyword lexing
 		Refined reworked grammar to remove redundancies 
 		Fixed parser and testing framework to work with updated grammar
+	Alice Wang (aw3271):
+		Assigned task: Print out AST structure
+		Added printing support to ast.ml 
+		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
+		
