@@ -32,4 +32,4 @@ let rec string_of_expr = function
   | InfixOp(i1, op, i2) -> string_of_expr i1 ^ " " ^ string_of_op op ^ " " ^ string_of_expr i2
   | ParenExp(e) ->  "(" ^ string_of_expr e ^ ")"
 let string_of_prog = function 
-  Expr(e) -> "\n\nParsed program: \n\n" ^ string_of_expr e 
+  Expr(e) -> "Parsed program: \n\t" ^ string_of_expr e 
