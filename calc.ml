@@ -6,6 +6,7 @@ let rec eval_all = function
   Expr(x) -> 
     let symbol_table = StringMap.empty in eval symbol_table x
 
+
 and eval symbol_table = function
       CondExp(cond, e1, e2) -> 
         (match eval symbol_table cond with 
@@ -31,6 +32,9 @@ and eval symbol_table = function
         | Less -> if v1 < v2 then 1 else 0
         | Leq -> if v1 <= v2 then 1 else 0)
     | IntLit(x) -> x
+    | FloatLit(x) -> x
+    | StringLit(x) -> x
+    | CharLit(x) -> x
     | Var(s) -> StringMap.find s symbol_table
 
 let _ =

@@ -9,3 +9,9 @@ and expr =
   | Assign of string * expr * expr 
   | Var of string
   | IntLit of int
+  | FloatLit of float
+  | StringLit of string
+  | CharLit of char
+  | ParenExp of expr
+
+

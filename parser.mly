@@ -58,6 +58,9 @@ expr:
 
     // Literals
   | INTLIT { IntLit $1 }
+  | FLOATLIT { FloatLit $1 }
+  | STRINGLIT { StringLit $1 }
+  | CHARLIT { CharLit $1 }
 
     // Parenthesized Expressions
   | LPAREN expr RPAREN { $2 }
