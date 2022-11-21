@@ -1,0 +1,4 @@
+0=| Expected value: |=0
+0=| Tests list constructor, concat, head, tail operators |=0
+let l = 1 :: 2 in 
+head l + tail (l @ 3)
