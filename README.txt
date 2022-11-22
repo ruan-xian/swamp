@@ -70,9 +70,10 @@ conditional.swamp
 		Variable scoping
 	Ken Miura (km3635):
 		Keyword and type lexing
-		Refined reworked grammar to remove redundancies 
+		Refined reworked grammar to remove redundancies, updated LRM 
 		Fixed parser and testing framework to work with updated grammar
-		Implemented Lists and related operators
+		Implemented Lists and related operators (parser/scanner/print/test)
+		Implemented List Comprehension (parser/scanner/print/test)
 	Alice Wang (aw3271):
 		Assigned task: Print out AST structure
 		Added printing support to ast.ml 
