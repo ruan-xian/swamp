@@ -48,6 +48,7 @@ rule tokenize = parse
   | ">" { GREATER }
   | "!=" { NEQ }
   | '=' { ASSIGN }
+  | "->" { ARROW } 
 (* boolean operators *)
   | "and" { AND }
   | "or" { OR }

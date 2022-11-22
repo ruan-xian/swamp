@@ -1,7 +1,7 @@
 %{ open Ast %}
 
 %token COMMA SEMI COLON LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE EOF
-%token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ
+%token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ ARROW
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
 %token TLIT FLIT AND OR NOT
@@ -14,6 +14,7 @@
 
 // %left SEMICOLON
 %left IN
+%right ARROW
 %left OR AND NOT
 %left EQUAL GREATER LESS LEQ GEQ NEQ
 %left ELSE
@@ -38,6 +39,14 @@ expr:
     // Let Expression
   | LET ID ASSIGN expr IN expr { Assign($2, $4, $6) }
 
+    // Function Definition
+  | FUN LPAREN formals_opt RPAREN ARROW expr { FunExp($3, $6) }
+    // Syntactic Sugar Function Def
+  | LET ID LPAREN formals_opt RPAREN ASSIGN expr IN expr { FunAssign($2, $4, $7, $9) }
+    // Function Application
+  | ID LPAREN args_opt RPAREN { FunApp($1, $3) }
+  | LPAREN expr RPAREN LPAREN args_opt RPAREN { FunExpApp($2, $5) }
+
     // Variable
   | ID { Var $1 }
 
@@ -61,3 +70,19 @@ expr:
 
     // Parenthesized Expressions
   | LPAREN expr RPAREN { ParenExp($2) }
+
+formals_opt:
+    /*nothing*/ { [] }
+  | formals_list { $1 } 
+
+formals_list:
+  | ID { [$1] }
+  | ID COMMA formals_list { $1::$3 }
+
+args_opt:
+    /*nothing*/ { [] }
+  | args_list { $1 } 
+
+args_list:
+  | expr { [$1] }
+  | expr COMMA args_list { $1::$3 }

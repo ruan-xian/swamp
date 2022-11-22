@@ -11,6 +11,8 @@ and eval symbol_table = function
         (match eval symbol_table cond with 
           0 -> eval symbol_table e2
         | _ -> eval symbol_table e1)
+
+    (* for now don't deal with function expressions *)
     | Assign(id, exp, exp2) -> 
         let value = eval symbol_table exp in
           let new_symbol_table = StringMap.add id value symbol_table in
@@ -33,6 +35,13 @@ and eval symbol_table = function
     | IntLit(x) -> x
     | Var(s) -> StringMap.find s symbol_table
     | ParenExp(e) -> eval symbol_table e
+
+    (* this is not the correct behavior for functions
+       but leaving as placeholder *)
+    | FunExp(_, _) -> 0
+    | FunAssign(_,_,_,_) -> 0
+    | FunApp(_,_) -> 0
+    | FunExpApp(_,_) -> 0
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
