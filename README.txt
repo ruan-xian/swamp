@@ -41,7 +41,7 @@
 
 4.	We are aiming to add the following features:
 		lists
-		functions and function definitions
+		recursive keyword for functions
 
 5.	Team member contributions:
 	Ryan Xu (rx2189):
@@ -57,4 +57,8 @@
 		Assigned task: Print out AST structure
 		Added printing support to ast.ml 
 		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
+	Ellen Guo (ekg2134):
+		Parser foundations + operators (if/then/else, worked with Ryan on arithmetic)
+		Reworked grammar from initial LRM 
+		Function definition and application + tests
 		
