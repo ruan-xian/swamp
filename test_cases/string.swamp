@@ -1,2 +1,2 @@
-0=| Expected value: "L" |=0
-let x = "L" in x
+0=| Expected value: "out of the swamp" |=0
+let x = "Get out of my swamp!" in x

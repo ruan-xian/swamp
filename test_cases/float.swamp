@@ -1,0 +1,2 @@
+0=| Expected value: -99999.93 |=0
+let x = 2.1 in let y = .3E+3 in let z = 1e5 in x / y - z
