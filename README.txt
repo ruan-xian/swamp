@@ -69,9 +69,10 @@ conditional.swamp
 		Testing framework (calc.ml, run_tests.sh, test cases)
 		Variable scoping
 	Ken Miura (km3635):
-		Keyword lexing
+		Keyword and type lexing
 		Refined reworked grammar to remove redundancies 
 		Fixed parser and testing framework to work with updated grammar
+		Implemented Lists and related operators
 	Alice Wang (aw3271):
 		Assigned task: Print out AST structure
 		Added printing support to ast.ml 
