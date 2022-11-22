@@ -78,7 +78,7 @@ conditional.swamp
 		Added printing support to ast.ml 
 		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
 	Cindy Zhu (cwz2102):
-		Variable Types
-		Boolean and Unary Operators - parsing, scanning, and printing
-		Support for all Variable types in calc.ml
+		Variable Types - parsing, printing, test cases
+		Boolean and Unary Operators - parsing, scanning, printing, test cases
+		Support for all variable types in calc.ml
 		
