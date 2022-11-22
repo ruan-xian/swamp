@@ -1,6 +1,7 @@
 %{ open Ast %}
 
-%token COMMA SEMI COLON LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE EOF
+%token COMMA SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE EOF
+%token CONS CAT HEAD TAIL
 %token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
@@ -13,7 +14,7 @@
 %token <string> ID STRINGLIT
 %token <char> CHARLIT
 
-// %left SEMICOLON
+// %left SEMI
 %left IN
 %left OR AND
 %left EQUAL GREATER LESS LEQ GEQ NEQ
@@ -23,6 +24,9 @@
 %left PLUS MINUS
 %left MULT DIV MOD
 %nonassoc UMINUS NOT
+
+%left CONS CAT
+%nonassoc TAIL HEAD
 
 %start program
 %type <Ast.program> program
@@ -64,6 +68,12 @@ expr:
   | NOT expr { UnaryOp(Not, $2) }
   | MINUS expr %prec UMINUS { UnaryOp(UMinus, $2) }
 
+    // List Operations
+  | expr CONS expr { InfixOp($1, Cons, $3) }
+  | expr CAT expr { InfixOp($1, Cat, $3) }
+  | HEAD expr { PrefixOp(Head, $2) }
+  | TAIL expr { PrefixOp(Tail, $2) }
+
     // Literals
   | INTLIT { IntLit $1 }
   | BOOLLIT { BoolLit $1 }
@@ -73,3 +83,13 @@ expr:
 
     // Parenthesized Expressions
   | LPAREN expr RPAREN { ParenExp($2) }
+
+    // Lists
+  | LBRACKET iter RBRACKET { ListExp($2) }
+
+iter:
+    expr { [$1] }
+  | expr SEMI iter { $1 :: $3 }
+  |     { [] }
+
+
