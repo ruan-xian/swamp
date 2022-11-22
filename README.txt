@@ -38,6 +38,8 @@
 		variable assignment
 		conditional expressions
 		binary operations
+		function definition (including syntactic sugar version)
+		function application (including parenthesized application)
 
 4.	We are aiming to add the following features:
 		lists
