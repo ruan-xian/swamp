@@ -60,6 +60,8 @@ and eval symbol_table : expr->typ = function
     | FloatLit(x) -> Float x
     | StringLit(x) -> String x
     | CharLit(x) -> Char x
+    | BoolLit(x) -> Bool x
+    | ParenExp(e)-> eval symbol_table e
     | Var(s) ->  StringMap.find s symbol_table
 
 let _ =

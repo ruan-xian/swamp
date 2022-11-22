@@ -1,2 +1,2 @@
-0=| Expected value:  |=0
-let x = True in let y = False in (not x) and y
+0=| Expected value: true |=0
+let x = True in let y = False in not y and x
