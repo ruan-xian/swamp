@@ -8,7 +8,7 @@
 1.	Our file structure consists of three main files:
 		scanner.mll
 		parser.mly
-		ast.mli			(ALICE CHANGE THIS TO AST.ML ONCE YOU DO PRINTING)
+		ast.ml
 	In addition, we have a Makefile and some testing files:
 		test_cases/		(folder containing test files)
 		run_tests.sh	(bash script to run all tests)
@@ -24,11 +24,33 @@
 		microc/
 		hw2Q1/
 
-2.	To run our tests, you can type "make test" from the base directory. This makes
+2.	To run our calc tests, you can type "make test" from the base directory. This makes
 	all the files and runs the run_tests.sh script. The script will display expected
 	output as well as actual output (which may be an error).
 
-	ALICE ONCE YOU ADD PRINTING ALSO DETAIL HOW WE CAN PRINT THE LEXED AND PARSED OUTPUT 
+	Here is some sample output; depending on your bash interpreter it may or may not look different.
+	
+> sh run_tests.sh
+bad_assignment.swamp
+        0=| Expected value: not_found |=0
+        Fatal error: exception Not_found
+bad_lex.swamp
+        0=| Expected value: Illegal character ^ |=0
+        Fatal error: exception Failure("illegal character ^")
+bad_parse_assignment.swamp
+        0=| Expected value: Parse_error |=0
+        Fatal error: exception Stdlib.Parsing.Parse_error
+bad_parse_conditional_no_else.swamp
+        0=| Expected value: Parse_error |=0
+        Fatal error: exception Stdlib.Parsing.Parse_error
+conditional.swamp
+        0=| Expected value: 18216 |=0
+        18216
+
+	To print out the parsed programs, you can type "make print_test" from the base directory. 
+	This makes print_test.native and runs the run_print_tests.sh script. The script will display 
+	the name of the program, the program itself, and either the parsed program or a fatal_error if 
+	the program cannot be parsed. 
 
 3.	Currently, we support the following features:
 		int, float, char, and string types and literals
@@ -47,6 +69,12 @@
 		Testing framework (calc.ml, run_tests.sh, test cases)
 		Variable scoping
 	Ken Miura (km3635):
-		Keyword lexing
+		Keyword and type lexing
 		Refined reworked grammar to remove redundancies 
 		Fixed parser and testing framework to work with updated grammar
+		Implemented Lists and related operators
+	Alice Wang (aw3271):
+		Assigned task: Print out AST structure
+		Added printing support to ast.ml 
+		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
+		

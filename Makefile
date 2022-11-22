@@ -15,8 +15,14 @@ all : clean calc.out
 # your executable successfully, the output of test case will be 
 # generate automatically in a file named calc.out
 
-test: clean calc
+test: clean calc 
 	sh run_tests.sh
+
+print_test: clean build_print_test
+	sh run_print_tests.sh
+
+build_print_test: 
+	ocamlbuild print_test.native
 
 calc : parser.cmo scanner.cmo calc.cmo
 	ocamlc -w A -o calc $^
@@ -37,10 +43,10 @@ calc.out : calc calc.tb
 	./calc < calc.tb > calc.out
 
 # Depedencies from ocamldep
-calc.cmo : scanner.cmo parser.cmi ast.cmi
-calc.cmx : scanner.cmx parser.cmx ast.cmi
-parser.cmo : ast.cmi parser.cmi
-parser.cmx : ast.cmi parser.cmi
+calc.cmo : scanner.cmo parser.cmi ast.cmo
+calc.cmx : scanner.cmx parser.cmx ast.cmo
+parser.cmo : ast.cmo parser.cmi
+parser.cmx : ast.cmo parser.cmi
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
 
@@ -50,4 +56,4 @@ scanner.cmx : parser.cmx
 
 .PHONY : clean
 clean :
-	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml calc.out calc
+	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml calc.out calc print_test.native
