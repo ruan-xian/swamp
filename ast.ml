@@ -20,8 +20,12 @@ and expr =
   | CharLit of char
   | ParenExp of expr
   | ListExp of expr list
+  | FunExp of string list * expr
+  | FunAssign of string * string list * expr * expr 
+  | FunApp of string * expr list 
+  | FunExpApp of expr * expr list
 
-  let string_of_op = function
+let string_of_op = function
   Add -> "+"
   | Sub -> "-"
   | Mul -> "*"
@@ -43,6 +47,11 @@ and expr =
   | Head -> "head"
   | Tail -> "tail"
 
+let rec string_of_formals = function 
+    [] -> ""
+  | [f] -> f
+  | hd :: tl -> hd ^ ", " ^ string_of_formals tl
+
 let rec string_of_expr = function 
   | Var(s) -> s
   | IntLit(l) -> string_of_int l 
@@ -57,6 +66,15 @@ let rec string_of_expr = function
   | PrefixOp(op, e) -> string_of_op op ^ " " ^ string_of_expr e
   | ParenExp(e) ->  "(" ^ string_of_expr e ^ ")"
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
+  | FunExp(fs, e) -> "fun(" ^ string_of_formals fs ^ ") -> " ^ string_of_expr e
+  | FunAssign(s, fs, e1, e2) -> "let " ^ s ^ "(" ^ string_of_formals fs ^ ") = " ^ string_of_expr e1 ^ " in " ^ string_of_expr e2
+  | FunApp(s, es) -> s ^ "(" ^ string_of_args es ^ ")"
+  | FunExpApp(e1, es) -> "(" ^ string_of_expr e1 ^ ")(" ^ string_of_args es ^ ")"
+
+and string_of_args = function 
+  [] -> ""
+| [e] -> string_of_expr e
+| hd :: tl -> string_of_expr hd ^ ", " ^ string_of_args tl
 
 let string_of_prog = function 
   Expr(e) -> "Parsed program: \n\t" ^ string_of_expr e 

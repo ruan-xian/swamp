@@ -25,13 +25,13 @@ build_print_test:
 	ocamlbuild print_test.native
 
 calc : parser.cmo scanner.cmo calc.cmo
-	ocamlc -w A -o calc $^
+	ocamlc -w Aelz -o calc $^
 
 %.cmo : %.ml
-	ocamlc -w A -c $<
+	ocamlc -w Aelz -c $<
 
 %.cmi : %.mli
-	ocamlc -w A -c $<
+	ocamlc -w Aelz -c $<
 
 scanner.ml : scanner.mll
 	ocamllex $^
