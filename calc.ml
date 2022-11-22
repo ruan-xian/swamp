@@ -2,8 +2,8 @@ open Ast
 
 module StringMap = Map.Make(String)
 
-type typ = Int | Bool | Float | String | Char
-(* type typ = Int of int| Bool of bool| Float of float| String of string| Char of char *)
+(* type typ = Int | Bool | Float | String | Char *)
+type typ = Int of int| Bool of bool| Float of float| String of string| Char of char
 
 let rec eval_all = function
   Expr(x) -> 
@@ -24,49 +24,49 @@ and eval symbol_table : typ = function
         let v2 = eval symbol_table e2 in
         (match op with
           Add ->  match ((eval symbol_table v1, eval symbol_table v2)) with 
-            (Type(Int a), Type(Int b)) -> Int (v1 + v2)
-            | (Type(Float a), Type(Float b)) -> Float (v1 +. v2)
+            (Int a, Int b) -> Int (v1 + v2)
+            | (Float a, Float b) -> Float (v1 +. v2)
         | Sub -> match ((eval symbol_table v1, eval symbol_table v2)) with 
-            (Type(Int a), Type(Int b)) -> Int (v1 - v2)
-            | (Type(Float a), Type(Float b)) -> Float (v1 -. v2)
+            (Int a, Int b) -> Int (v1 - v2)
+            | (Float a, Float b) -> Float (v1 -. v2)
         | Mul -> match ((eval symbol_table v1, eval symbol_table v2)) with 
-            (Type(Int a), Type(Int b)) -> Int (v1 * v2)
-            | (Type(Float a), Type(Float b)) -> Float (v1 *. v2)
+            (Int a, Int b) -> Int (v1 * v2)
+            | (Float a, Float b) -> Float (v1 *. v2)
         | Div -> match ((eval symbol_table v1, eval symbol_table v2)) with 
-          (Type(Int a), Type(Int b)) -> Int (v1 / v2)
-          | (Type(Float a), Type(Float b)) -> Float (v1 /. v2)
+            (Int a, Int b) -> Int (v1 / v2)
+          | (Float a, Float b) -> Float (v1 /. v2)
         | Mod -> v1 mod v2
-        | Eq -> if v1 = v2 then Bool True else Bool False
-        | Neq -> if v1 != v2ye then Bool True else Bool False
-        | Greater -> if v1 > v2 then Bool True else Bool False
-        | Geq -> if v1 >= v2 then Bool True else Bool False
-        | Less -> if v1 < v2 then Bool True else Bool False
-        | Leq -> if v1 <= v2 then Bool True else Bool False
+        | Eq -> if v1 = v2 then Bool true else Bool false
+        | Neq -> if v1 != v2ye then Bool true else Bool false
+        | Greater -> if v1 > v2 then Bool true else Bool false
+        | Geq -> if v1 >= v2 then Bool true else Bool false
+        | Less -> if v1 < v2 then Bool true else Bool false
+        | Leq -> if v1 <= v2 then Bool true else Bool false
         | And -> match (v1, v2) with 
-          (True, True) -> Bool True
-          | (True, False) -> Bool False
-          | (False, True) -> Bool False
-          | (False, False) -> Bool False
+          (true, true) -> Bool true
+          | (true, false) -> Bool false
+          | (false, true) -> Bool false
+          | (false, false) -> Bool false
         | Or -> match (v1, v2) with 
-          (True, True) -> Bool True
-          | (True, False) -> Bool True
-          | (False, True) -> Bool True
-          | (False, False) -> Bool False
+          (true, true) -> Bool true
+          | (true, false) -> Bool true
+          | (false, true) -> Bool true
+          | (false, false) -> Bool false
         )
     | UnaryOp(op, e1) -> 
       let v1  = eval symbol_table e1 in
       (match op with 
         Not -> match v1 with 
-          True -> Bool False
-          | False -> Bool True
+          true -> Bool false
+          | false -> Bool true
       | UMinus -> match (eval v1) with 
-        Type(Int a) -> Int (-v1)
-      | Type(Float a) -> Float (-.v1))
+        Int a -> Int -v1
+      | Float a -> Float -.v1)
     | IntLit(x) -> Int x
-    | FloatLit(x) ->Float x
+    | FloatLit(x) -> Float x
     | StringLit(x) -> String x
     | CharLit(x) -> Char x
-    | Var(s) -> Typ (StringMap.find s symbol_table)
+    | Var(s) ->  StringMap.find s symbol_table
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
