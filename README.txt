@@ -19,6 +19,10 @@
 	expressions are also supported. This is basically a stopgap so we can test our 
 	parsing before we do IR generation.
 
+	It also gives (vague) warnings when something semantically bad is done, so this also
+	functions as a semantic checker in some ways (though it doesn't do semantic checking)
+	for lists and functions yet.
+
 	Finally, some folders containing reference code are in our directory.
 	(REMOVE THIS IF IT ISN'T IN OUR SUBMISSION ZIP)
 		microc/
@@ -57,10 +61,11 @@ conditional.swamp
 		variable assignment
 		conditional expressions
 		binary operations
+		function definition (including syntactic sugar version)
+		function application (including parenthesized application)
 
 4.	We are aiming to add the following features:
-		lists
-		functions and function definitions
+		semantic checking for lists and functions (no time)
 
 5.	Team member contributions:
 	Ryan Xu (rx2189):
@@ -68,15 +73,21 @@ conditional.swamp
 		Parser foundations + operators (arithmetic and boolean)
 		Testing framework (calc.ml, run_tests.sh, test cases)
 		Variable scoping
+		Turning calc.ml into a weird semantic checker
 	Ken Miura (km3635):
 		Keyword and type lexing
-		Refined reworked grammar to remove redundancies 
+		Refined reworked grammar to remove redundancies, updated LRM 
 		Fixed parser and testing framework to work with updated grammar
-		Implemented Lists and related operators
+		Implemented Lists and related operators (parser/scanner/print/test)
+		Implemented List Comprehension (parser/scanner/print/test)
 	Alice Wang (aw3271):
 		Assigned task: Print out AST structure
 		Added printing support to ast.ml 
 		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
+	Ellen Guo (ekg2134):
+		Parser foundations + operators (if/then/else, worked with Ryan on arithmetic)
+		Reworked grammar from initial LRM 
+		Function definition and application + tests
 	Cindy Zhu (cwz2102):
 		Variable Types - parsing, printing, test cases
 		Boolean and Unary Operators - parsing, scanning, printing, test cases
