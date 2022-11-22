@@ -15,13 +15,14 @@
 
 // %left SEMICOLON
 %left IN
-%left OR AND NOT
+%left OR AND
 %left EQUAL GREATER LESS LEQ GEQ NEQ
 %left ELSE
 
 %right ASSIGN
 %left PLUS MINUS
 %left MULT DIV MOD
+%nonassoc UMINUS NOT
 
 %start program
 %type <Ast.program> program
