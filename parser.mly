@@ -5,23 +5,26 @@
 %token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
-%token TLIT FLIT AND OR NOT
+%token AND OR NOT UMINUS
 %token TYPE INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE
 
 %token <int> INTLIT
+%token <bool> BOOLLIT
 %token <float> FLOATLIT
 %token <string> ID STRINGLIT
 %token <char> CHARLIT
 
 // %left SEMI
+%left IN
 %left FOR IN IF
-%left OR AND NOT
+%left OR AND
 %left EQUAL GREATER LESS LEQ GEQ NEQ
 %left ELSE
 
 %right ASSIGN
 %left PLUS MINUS
 %left MULT DIV MOD
+%nonassoc UMINUS NOT
 
 %left CONS CAT
 %nonassoc TAIL HEAD
@@ -59,15 +62,25 @@ expr:
   | expr LESS expr { InfixOp($1, Less, $3) }
   | expr LEQ expr { InfixOp($1, Leq, $3) }
   | expr NEQ expr { InfixOp($1, Neq, $3) }
+  | expr AND expr { InfixOp($1, And, $3) }
+  | expr OR expr { InfixOp($1, Or, $3) }
+
+    // Urnary Operations
+  | NOT expr { UnaryOp(Not, $2) }
+  | MINUS expr %prec UMINUS { UnaryOp(UMinus, $2) }
 
     // List Operations
   | expr CONS expr { InfixOp($1, Cons, $3) }
   | expr CAT expr { InfixOp($1, Cat, $3) }
-  | HEAD expr { PrefixOp(Head, $2) }
-  | TAIL expr { PrefixOp(Tail, $2) }
+  | HEAD expr { UnaryOp(Head, $2) }
+  | TAIL expr { UnaryOp(Tail, $2) }
 
     // Literals
   | INTLIT { IntLit $1 }
+  | BOOLLIT { BoolLit $1 }
+  | FLOATLIT { FloatLit $1 }
+  | STRINGLIT { StringLit $1 }
+  | CHARLIT { CharLit $1 }
 
     // Parenthesized Expressions
   | LPAREN expr RPAREN { ParenExp($2) }

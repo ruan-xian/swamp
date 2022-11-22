@@ -73,8 +73,8 @@ rule tokenize = parse
   | "None" { NONE }
   | "_" { WILDCARD }
 (* boolean literals *)
-  | "True" { TLIT }
-  | "False" { FLIT }
+  | "True" { BOOLLIT(true) }
+  | "False" { BOOLLIT(false) }
 (* types *)
   | "int" { INTTYPE }
   | "float" { FLOATTYPE }
