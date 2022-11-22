@@ -14,7 +14,7 @@
 %token <char> CHARLIT
 
 // %left SEMI
-%left IN
+%left FOR IN IF
 %left OR AND NOT
 %left EQUAL GREATER LESS LEQ GEQ NEQ
 %left ELSE
@@ -74,10 +74,21 @@ expr:
 
     // Lists
   | LBRACKET iter RBRACKET { ListExp($2) }
+  | LBRACKET comp RBRACKET { $2 }
 
 iter:
     expr { [$1] }
   | expr SEMI iter { $1 :: $3 }
   |     { [] }
+
+comp:
+    expr FOR ID IN expr qual { ListComp($1, CompFor($3, $5) :: $6) }
+  | expr FOR ID IN ID qual { ListComp($1, CompFor($3, Var($5)) :: $6) }
+
+qual:
+    FOR ID IN expr qual { CompFor($2, $4) :: $5 }
+  | FOR ID IN ID qual { CompFor($2, Var($4)) ::  $5 }
+  | IF expr qual { CompIf($2) :: $3 }
+  |      { [] }
 
 

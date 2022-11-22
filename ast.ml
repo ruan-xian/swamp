@@ -12,6 +12,11 @@ and expr =
   | IntLit of int
   | ParenExp of expr
   | ListExp of expr list
+  | ListComp of expr * qual list
+
+and qual =
+  | CompFor of string * expr
+  | CompIf of expr
 
   let string_of_op = function
   Add -> "+"
@@ -39,6 +44,11 @@ let rec string_of_expr = function
   | PrefixOp(op, e) -> string_of_op op ^ " " ^ string_of_expr e
   | ParenExp(e) ->  "(" ^ string_of_expr e ^ ")"
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
+  | ListComp(e1, ql) -> "[" ^ string_of_expr e1 ^ " " ^ String.concat " " (List.map string_of_qual ql) ^ "]"
+
+and string_of_qual = function
+  | CompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_expr itr 
+  | CompIf(e) -> "if " ^ string_of_expr e
 
 let string_of_prog = function 
   Expr(e) -> "Parsed program: \n\t" ^ string_of_expr e 
