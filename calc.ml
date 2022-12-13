@@ -82,7 +82,7 @@ and eval symbol_table : expr->typ = function
     | FunExp(_,_) 
     | AssignRec(_,_,_) 
     | FunApp(_,_) 
-    | ListExp(_) -> failwith "functions not semantically checked yet"
+    | ListExp _ -> failwith "lists not semantically checked yet"
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
