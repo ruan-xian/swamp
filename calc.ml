@@ -82,6 +82,7 @@ and eval symbol_table : expr->typ = function
     | FunExp(_,_) 
     | AssignRec(_,_,_) 
     | FunApp(_,_) -> failwith "functions not semantically checked yet"
+    | ListComp (_, _)
     | ListExp _ -> failwith "lists not semantically checked yet"
 
 let _ =
