@@ -22,7 +22,6 @@ and expr =
   | ListExp of expr list
   | ListComp of expr * qual list
   | FunExp of string list * expr
-  | FunAssignRec of string * string list * expr * expr 
   | FunApp of expr * expr list 
 
 and qual =
