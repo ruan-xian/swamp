@@ -108,11 +108,9 @@ iter:
 
 comp:
     expr FOR ID IN expr qual { ListComp($1, CompFor($3, $5) :: $6) }
-  | expr FOR ID IN ID qual { ListComp($1, CompFor($3, Var($5)) :: $6) }
 
 qual:
     FOR ID IN expr qual { CompFor($2, $4) :: $5 }
-  | FOR ID IN ID qual { CompFor($2, Var($4)) ::  $5 }
   | IF expr qual { CompIf($2) :: $3 }
   |      { [] }
 
