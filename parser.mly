@@ -6,7 +6,7 @@
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
 %token AND OR NOT UMINUS
-%token TYPE INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE
+%token TYPE COLON INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE LISTTYPE
 
 %token <int> INTLIT
 %token <bool> BOOLLIT
@@ -114,14 +114,33 @@ qual:
   | IF expr qual { CompIf($2) :: $3 }
   |      { [] }
 
-
 formals_opt:
     /*nothing*/ { [] }
   | formals_list { $1 } 
 
 formals_list:
-  | ID { [$1] }
-  | ID COMMA formals_list { $1::$3 }
+  | formal { [$1] }
+  | formal COMMA formals_list { $1::$3 }
+
+formal:
+  ID COLON typ { Formal($1, $3) }
+
+typ:
+    INTTYPE   { Int }
+  | FLOATTYPE  { Float }
+  | CHARTYPE  { Char }
+  | STRTYPE  { String }
+  | BOOLTYPE  { Bool }
+  | LISTTYPE LESS typ GREATER { List($3)  }
+  | LPAREN typ_opt ARROW typ RPAREN { Function($2, $4) }
+
+typ_opt:
+    /*nothing*/ { [] }
+  | typ_list { $1 } 
+
+typ_list:
+  | typ { [$1] }
+  | typ COMMA typ_list { $1::$3 }
 
 args_opt:
     /*nothing*/ { [] }

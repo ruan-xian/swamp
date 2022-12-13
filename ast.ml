@@ -3,6 +3,8 @@ type operator = Add | Sub | Mul | Div | Mod
               | And | Or | Not | UMinus
               | Cat | Cons | Head | Tail
 
+type typ = Int | Float | Char | String | Bool | List of typ | Function of typ list * typ
+
 type program =
     Expr of expr
 
@@ -21,8 +23,10 @@ and expr =
   | ParenExp of expr
   | ListExp of expr list
   | ListComp of expr * qual list
-  | FunExp of string list * expr
+  | FunExp of formal list * expr
   | FunApp of expr * expr list 
+
+and formal = Formal of string * typ
 
 and qual =
   | CompFor of string * expr
@@ -49,10 +53,23 @@ let string_of_op = function
   | Head -> "head"
   | Tail -> "tail"
 
-let rec string_of_formals = function 
-    [] -> ""
-  | [f] -> f
-  | hd :: tl -> hd ^ ", " ^ string_of_formals tl
+
+let rec string_of_list stringify = function
+[] -> ""
+| [x] -> stringify x
+| hd :: tl -> stringify hd ^ ", " ^ string_of_list stringify tl
+
+let rec string_of_typ = function
+    Int -> "int"
+  | Float -> "float"
+  | Char -> "char"
+  | String -> "string"
+  | Bool -> "bool"
+  | List(typ) -> "list<" ^ string_of_typ typ ^ ">"
+  | Function(params, ret) -> "(" ^ string_of_list string_of_typ params ^ " -> " ^ string_of_typ ret
+
+let string_of_formal = function
+  Formal(id, typ) -> id ^ ":" ^ string_of_typ typ
 
 let rec string_of_expr = function 
   | Var(s) -> s
@@ -69,7 +86,7 @@ let rec string_of_expr = function
   | ParenExp(e) ->  "(" ^ string_of_expr e ^ ")"
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
   | ListComp(e1, ql) -> "[" ^ string_of_expr e1 ^ " " ^ String.concat " " (List.map string_of_qual ql) ^ "]"
-  | FunExp(fs, e) -> "fun(" ^ string_of_formals fs ^ ") -> " ^ string_of_expr e
+  | FunExp(fs, e) -> "fun(" ^ string_of_list string_of_formal fs ^ ") -> " ^ string_of_expr e
   | FunApp(s, es) -> string_of_expr s ^ "(" ^ string_of_args es ^ ")"
 
 and string_of_qual = function
