@@ -20,7 +20,6 @@ let check program =
 
   (* Return a semantically-checked expression, i.e., with a type *)
   let rec check_expr type_table : expr->shrexpr = function
-    (* for now don't deal with function expressions *)
     | InfixOp(e1, op, e2) as ex -> 
       let (t1, e1') = check_expr type_table e1
       and (t2, e2') = check_expr type_table e2 in
@@ -36,6 +35,10 @@ let check program =
     | FloatLit l -> (Float, SFloatLit l)
     | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
+    | Assign(id, rhs, exp) ->
+      let (t1, e1') = check_expr type_table rhs in
+      let (t2, e2') = check_expr (StringMap.add id t1 type_table) exp in
+      (t2, SAssign(id, (t1, e1'), (t2, e2')))
   in
   match program with
   | Expr(e) -> check_expr StringMap.empty e
