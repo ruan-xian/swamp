@@ -3,6 +3,8 @@ type operator = Add | Sub | Mul | Div | Mod
               | And | Or | Not | UMinus
               | Cat | Cons | Head | Tail
 
+type typ = Int | Float
+
 type program =
     Expr of expr
 
@@ -28,6 +30,10 @@ and expr =
 and qual =
   | CompFor of string * expr
   | CompIf of expr
+
+let string_of_typ = function
+    Int -> "int"
+  | Float -> "float"
 
 let string_of_op = function
   Add -> "+"
