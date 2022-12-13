@@ -82,7 +82,6 @@ and string_of_args = function
   [] -> ""
 | [e] -> string_of_expr e
 | hd :: tl -> string_of_expr hd ^ ", " ^ string_of_args tl
->>>>>>> main
 
 let string_of_prog = function 
   Expr(e) -> "Parsed program: \n\t" ^ string_of_expr e 
