@@ -3,7 +3,14 @@ type operator = Add | Sub | Mul | Div | Mod
               | And | Or | Not | UMinus
               | Cat | Cons | Head | Tail
 
-type typ = Int | Float | Char | String | Bool | List of typ | Function of typ list * typ
+type typ = 
+    Int 
+  | Float 
+  | Char 
+  | String 
+  | Bool 
+  | List of typ 
+  | Function of typ list * typ
 
 type program =
     Expr of expr

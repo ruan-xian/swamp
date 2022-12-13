@@ -104,7 +104,7 @@ expr:
 iter:
     expr { [$1] }
   | expr SEMI iter { $1 :: $3 }
-  |     { [] }
+  | typ  { [] }
 
 comp:
     expr FOR ID IN expr qual { ListComp($1, CompFor($3, $5) :: $6) }
@@ -131,7 +131,7 @@ typ:
   | CHARTYPE  { Char }
   | STRTYPE  { String }
   | BOOLTYPE  { Bool }
-  | LISTTYPE LESS typ GREATER { List($3)  }
+  | LISTTYPE LESS typ GREATER { List($3) }
   | LPAREN typ_opt ARROW typ RPAREN { Function($2, $4) }
 
 typ_opt:
