@@ -1,18 +1,18 @@
 0=| Expected value: Not implemented |=0
 0=| did not implement function things in calc.ml so expected value is not correct |=0
-let f1 = fun(x, y) -> let c = 2 in c * x + y in
+let f1 = fun(x:int, y:(int, float -> list<char>)) -> let c = 2 in c * x + y in
 let f2 = fun() -> 2 * (3 + 4) in
-let f3(x) = x - 3 + 1 in
+let f3(x:char) = x - 3 + 1 in
 
-let onion fact = fun(n) -> 
+let onion fact = fun(n:int) -> 
   if n == 0 then 1
   else n * (fact     (n-1))
 in
 
-let onion fact2(n) =
+let onion fact2(n:list<list<int>>) =
   if n == 0 then 1
   else n * (fact(n-1))
 in
 
 let k = f1(2, 3) in
-k + (fun(x) -> x * x)(2)
+k + (fun(x:bool) -> x * x)(2)

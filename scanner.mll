@@ -83,6 +83,8 @@ rule tokenize = parse
   | "char" { CHARTYPE }
   | "string" { STRTYPE }
   | "bool" { BOOLTYPE }
+  | "list" { LISTTYPE }
+  | ":" { COLON } 
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  
