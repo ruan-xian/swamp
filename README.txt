@@ -20,11 +20,10 @@
 	parsing before we do IR generation.
 
 	It also gives (vague) warnings when something semantically bad is done, so this also
-	functions as a semantic checker in some ways (though it doesn't do semantic checking)
-	for lists and functions yet.
+	functions as a semantic checker in some ways (though it doesn't do semantic checking
+	for lists and functions yet).
 
-	Finally, some folders containing reference code are in our directory.
-	(REMOVE THIS IF IT ISN'T IN OUR SUBMISSION ZIP)
+	Finally, some folders containing reference code are in our directory. These can be ignored.
 		microc/
 		hw2Q1/
 
