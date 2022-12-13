@@ -22,10 +22,8 @@ and expr =
   | ListExp of expr list
   | ListComp of expr * qual list
   | FunExp of string list * expr
-  | FunAssign of string * string list * expr * expr 
   | FunAssignRec of string * string list * expr * expr 
-  | FunApp of string * expr list 
-  | FunExpApp of expr * expr list
+  | FunApp of expr * expr list 
 
 and qual =
   | CompFor of string * expr
@@ -73,10 +71,7 @@ let rec string_of_expr = function
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
   | ListComp(e1, ql) -> "[" ^ string_of_expr e1 ^ " " ^ String.concat " " (List.map string_of_qual ql) ^ "]"
   | FunExp(fs, e) -> "fun(" ^ string_of_formals fs ^ ") -> " ^ string_of_expr e
-  | FunAssign(s, fs, e1, e2) -> "let " ^ s ^ "(" ^ string_of_formals fs ^ ") = " ^ string_of_expr e1 ^ " in " ^ string_of_expr e2
-  | FunAssignRec(s, fs, e1, e2) -> "let " ^ s ^ "(" ^ string_of_formals fs ^ ") = " ^ string_of_expr e1 ^ " in " ^ string_of_expr e2
-  | FunApp(s, es) -> s ^ "(" ^ string_of_args es ^ ")"
-  | FunExpApp(e1, es) -> "(" ^ string_of_expr e1 ^ ")(" ^ string_of_args es ^ ")"
+  | FunApp(s, es) -> string_of_expr s ^ "(" ^ string_of_args es ^ ")"
 
 and string_of_qual = function
   | CompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_expr itr 

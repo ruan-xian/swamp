@@ -50,12 +50,12 @@ expr:
     // Function Definition
   | FUN LPAREN formals_opt RPAREN ARROW expr { FunExp($3, $6) }
     // Syntactic Sugar Function Def
-  | LET ID LPAREN formals_opt RPAREN ASSIGN expr IN expr { FunAssign($2, $4, $7, $9) }
-  | LET ONION ID LPAREN formals_opt RPAREN ASSIGN expr IN expr { FunAssignRec($3, $5, $8, $10) }
+  | LET ID LPAREN formals_opt RPAREN ASSIGN expr IN expr { Assign($2, FunExp($4, $7), $9)}
+  | LET ONION ID LPAREN formals_opt RPAREN ASSIGN expr IN expr { AssignRec($3, FunExp($5, $8), $10) }
 
     // Function Application
-  | ID LPAREN args_opt RPAREN { FunApp($1, $3) }
-  | LPAREN expr RPAREN LPAREN args_opt RPAREN { FunExpApp($2, $5) }
+  | ID LPAREN args_opt RPAREN { FunApp(Var($1), $3) }
+  | LPAREN expr RPAREN LPAREN args_opt RPAREN { FunApp($2, $5) }
 
     // Variable
   | ID { Var $1 }

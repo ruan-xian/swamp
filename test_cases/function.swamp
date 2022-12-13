@@ -6,12 +6,12 @@ let f3(x) = x - 3 + 1 in
 
 let onion fact = fun(n) -> 
   if n == 0 then 1
-  else n * (fact (n-1))
+  else n * (fact     (n-1))
 in
 
 let onion fact2(n) =
   if n == 0 then 1
-  else n * (fact (n-1))
+  else n * (fact(n-1))
 in
 
 let k = f1(2, 3) in
