@@ -1,6 +1,6 @@
 all : clean calc.out
 
-native: 
+native: clean
 	ocamlbuild -pkgs llvm swamp.native
 
 ##############################
