@@ -4,13 +4,13 @@ let f1 = fun(x, y) -> let c = 2 in c * x + y in
 let f2 = fun() -> 2 * (3 + 4) in
 let f3(x) = x - 3 + 1 in
 
-let onion fact2 = fun(n) -> 
-  if n = 0 then 1
+let onion fact = fun(n) -> 
+  if n == 0 then 1
   else n * (fact (n-1))
 in
 
-let onion fact(n) =
-  if n = 0 then 1
+let onion fact2(n) =
+  if n == 0 then 1
   else n * (fact (n-1))
 in
 
