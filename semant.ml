@@ -76,18 +76,19 @@ let check program =
     | Var var -> (type_of_identifier type_table var, SVar var)
     | ListExp(l) -> 
       let typed_list = List.map (check_expr type_table) l in
+      let tlst = fst(List.hd typed_list) in
       let rec check_list lst t =
         match lst with
           [] -> true
         | hd :: tl ->
-            if ty = fst(hd) then
+            if t = fst(hd) then
               check_list tl t
             else
               false
       in
-      if check_list typed_list fst(List.hd typed_list) then
-        (t, SListExp(typed_list))
-      else raise (Failure("Inconsistent type in " ^ string_of_expr l))
+      if check_list typed_list tlst then
+        (tlst, SListExp(typed_list))
+      else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
         let t2, e2' = check_expr (StringMap.add id t1 type_table) exp in
@@ -126,6 +127,5 @@ let check program =
      |ListComp (_, _)
      |FunApp (_, _) ->
         (Int, SIntLit 0)
->>>>>>> fc287affb42d65eb8e6bc03745d7add6d99eaf39
   in
   match program with Expr e -> check_expr StringMap.empty e
