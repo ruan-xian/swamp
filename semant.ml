@@ -61,6 +61,8 @@ let check program =
     | IntLit l -> (Int, SIntLit l)
     | FloatLit l -> (Float, SFloatLit l)
     | BoolLit l -> (Bool, SBoolLit l)
+    | StringLit l -> (String, SStringLit l)
+    | CharLit l -> (Char, SCharLit l)
     | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
     | Assign(id, rhs, exp) ->
