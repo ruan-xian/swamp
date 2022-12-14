@@ -78,7 +78,15 @@ let check program =
         let new_map =
           List.fold_left
             (fun m f ->
-              match f with Formal (name, ty) -> StringMap.add name ty m )
+              match f with
+              | Formal (name, ty) when not (StringMap.mem name m) ->
+                  StringMap.add name ty m
+              | _ ->
+                  raise
+                    (Failure
+                       ( "Names for formals in "
+                       ^ string_of_list string_of_formal formals
+                       ^ " must be unique" ) ) )
             type_table formals
         in
         let t, e = check_expr new_map rhs in
