@@ -1,2 +1,2 @@
 0=| Expected value: 18216 |=0
-if 2 + 3 >= 5 % 2 then (14 + 32) * 396 else 3
+if 2 + 3 >= 5 % 2 and 1==1 then (14 + 32) * 396 else 3
