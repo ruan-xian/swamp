@@ -39,11 +39,6 @@ and qual =
   | CompFor of string * expr
   | CompIf of expr
 
-let string_of_typ = function
-    Int -> "int"
-  | Float -> "float"
-  | Bool -> "bool"
-
 let string_of_op = function
   Add -> "+"
   | Sub -> "-"
