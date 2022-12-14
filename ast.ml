@@ -42,6 +42,7 @@ and qual =
 let string_of_typ = function
     Int -> "int"
   | Float -> "float"
+  | Bool -> "bool"
 
 let string_of_op = function
   Add -> "+"
