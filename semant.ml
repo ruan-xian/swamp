@@ -27,7 +27,8 @@ let check program =
         (*TODO: the resulting type isn't always the same as the operands but is the same for basic arithmetic. 
           Once we introduce booleans the type of the shrexpr should be updated to match each operator. See microc's semant*)
         (match op with
-          Add | Sub | Mul | Div | Mod ->
+          Add when t1 = String -> (t1, SInfixOp((t1, e1'), op, (t2, e2')))
+          | Add | Sub | Mul | Div | Mod -> 
             if t1 = Int || t1 = Float then (t1, SInfixOp((t1, e1'), op, (t2, e2')))
             else raise (Failure("Invalid operand types for expression " ^ string_of_expr ex))
         | Less | Greater | Geq | Leq ->
@@ -36,8 +37,7 @@ let check program =
         | Eq | Neq -> (Bool, SInfixOp((t1, e1'), op, (t2, e2')))
         | And | Or ->
             if t1 = Bool then (Bool, SInfixOp((t1, e1'), op, (t2, e2')))
-            else raise (Failure("Invalid operand types for expression " ^ string_of_expr ex))
-        )
+            else raise (Failure("Invalid operand types for expression " ^ string_of_expr ex)))
       else raise (Failure("Mismatched operand types in expression " ^ string_of_expr ex))
     | UnaryOp(op, e1) as ex -> 
       let (t, e') = check_expr type_table e1 in 
