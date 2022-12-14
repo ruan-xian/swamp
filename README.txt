@@ -55,6 +55,11 @@ conditional.swamp
 	the name of the program, the program itself, and either the parsed program or a fatal_error if 
 	the program cannot be parsed. 
 
+	To run semantic checking on the test programs, you can type "make semant_test" from the base directory. 
+	This makes swamp.native and runs the run_semant_tests.sh script. The script will display the name of 
+	the program and either the SAST or a Fatal error if the program cannot be parsed or it failed semantic 
+	checking. 
+
 3.	Currently, we support the following features:
 		int, float, char, and string types and literals
 		variable assignment

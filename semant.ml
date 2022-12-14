@@ -16,6 +16,7 @@ let check program =
     with Not_found -> raise (Failure ("undeclared identifier " ^ s))
   in
   (* Return a semantically-checked expression, i.e., with a type *)
+
   let rec check_expr type_table : expr -> shrexpr = function
     | InfixOp (e1, op, e2) as e ->
         let t1, e1' = check_expr type_table e1
@@ -68,7 +69,9 @@ let check program =
     | IntLit l -> (Int, SIntLit l)
     | FloatLit l -> (Float, SFloatLit l)
     | BoolLit l -> (Bool, SBoolLit l)
-    | ParenExp e -> check_expr type_table e
+    | StringLit l -> (String, SStringLit l)
+    | CharLit l -> (Char, SCharLit l)
+    | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
@@ -104,7 +107,7 @@ let check program =
         (Function (types, t), SFunExp (formals, (t, e)))
     (* TODO *)
     | AssignRec (_, _, _)
-     |StringLit _ | CharLit _ | ListExp _
+     | ListExp _
      |ListComp (_, _)
      |FunApp (_, _) ->
         (Int, SIntLit 0)
