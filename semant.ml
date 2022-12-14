@@ -75,7 +75,7 @@ let check program =
         let t2, e2' = check_expr (StringMap.add id t1 type_table) exp in
         (t2, SAssign (id, (t1, e1'), (t2, e2')))
     | FunExp (formals, rhs) ->
-        let new_map =
+        let _ =
           List.fold_left
             (fun m f ->
               match f with
@@ -87,6 +87,12 @@ let check program =
                        ( "Names for formals in "
                        ^ string_of_list string_of_formal formals
                        ^ " must be unique" ) ) )
+            StringMap.empty formals
+        in
+        let new_map =
+          List.fold_left
+            (fun m f ->
+              match f with Formal (name, ty) -> StringMap.add name ty m )
             type_table formals
         in
         let t, e = check_expr new_map rhs in
