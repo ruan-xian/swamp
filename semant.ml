@@ -31,6 +31,7 @@ let check program =
           (* Determine expression type based on operator and operand types *)
           let t =
             match op with
+              Add when t1 = String -> String
             | (Add | Sub | Mul | Div | Mod) when t1 = Int || t1 = Float -> t1
             | Eq | Neq -> Bool
             | (Less | Greater | Geq | Leq) when t1 = Int || t1 = Float ->
