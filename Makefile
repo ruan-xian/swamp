@@ -27,6 +27,12 @@ print_test: clean build_print_test
 build_print_test: 
 	ocamlbuild print_test.native
 
+semant_test: clean build_semant_test
+	sh run_semant_tests.sh
+
+build_semant_test:
+	ocamlbuild -pkgs llvm swamp.native
+
 calc : parser.cmo scanner.cmo calc.cmo
 	ocamlc -w +A-e-l-z -o calc $^
 
