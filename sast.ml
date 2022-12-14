@@ -17,8 +17,7 @@ and sx =
   | SParenExp of shrexpr
   | SListExp of shrexpr list
   | SListComp of shrexpr * squal list
-  | SFunExp of string list * shrexpr
-  | SFunAssignRec of string * string list * shrexpr * shrexpr 
+  | SFunExp of formal list * shrexpr
   | SFunApp of shrexpr * shrexpr list 
 
 and squal =
@@ -26,11 +25,6 @@ and squal =
   | SCompIf of shrexpr
 
 (*Pretty printing*)
-
-let rec string_of_formals = function 
-    [] -> ""
-  | [f] -> f
-  | hd :: tl -> hd ^ ", " ^ string_of_formals tl
 
 let rec string_of_shrexpr (t, e) = 
   "(" ^ string_of_typ t ^ " : " ^ (match e with
@@ -48,7 +42,7 @@ let rec string_of_shrexpr (t, e) =
     | SParenExp(e) ->  "(" ^ string_of_shrexpr e ^ ")"
     | SListExp(el) -> "[" ^ String.concat ";" (List.map string_of_shrexpr el) ^ "]" 
     | SListComp(e1, ql) -> "[" ^ string_of_shrexpr e1 ^ " " ^ String.concat " " (List.map string_of_squal ql) ^ "]"
-    | SFunExp(fs, e) -> "fun(" ^ string_of_formals fs ^ ") -> " ^ string_of_shrexpr e
+    | SFunExp(fs, e) -> "fun(" ^ string_of_list string_of_formal fs ^ ") -> " ^ string_of_shrexpr e
     | SFunApp(s, es) -> string_of_shrexpr s ^ "(" ^ string_of_sargs es ^ ")"
     ) ^ ")"
 
