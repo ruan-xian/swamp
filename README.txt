@@ -92,3 +92,8 @@ conditional.swamp
 		Boolean and Unary Operators - parsing, scanning, printing, test cases
 		Support for all variable types in calc.ml
 		
+	Team member contributions for final submission:
+	Ryan Xu (rx2189):
+		SAST
+		Semant framework
+		Semant support for some basic types, assignment, operators, conditionals
