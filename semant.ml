@@ -67,6 +67,20 @@ let check program =
       let (t1, e1') = check_expr type_table rhs in
       let (t2, e2') = check_expr (StringMap.add id t1 type_table) exp in
       (t2, SAssign(id, (t1, e1'), (t2, e2')))
+    | ListExp(l) -> 
+      let typed_list = List.map (check_expr type_table) l in
+      let rec check_list lst t =
+        match lst with
+          [] -> true
+        | hd :: tl ->
+            if ty = fst(hd) then
+              check_list tl t
+            else
+              false
+      in
+      if check_list typed_list fst(List.hd typed_list) then
+        (t, SListExp(typed_list))
+      else raise (Failure("Inconsistent type in " ^ string_of_expr l))
   in
   match program with
   | Expr(e) -> check_expr StringMap.empty e
