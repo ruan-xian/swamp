@@ -1,0 +1,7 @@
+0=| Expected value: Not implemented |=0
+0=| did not implement function things in calc.ml so expected value is not correct |=0
+
+let onion fib = fun(n:int) ->
+  if n <= 1 then 1
+  else fib(n-1) + fib(n-2)
+in fib(5)

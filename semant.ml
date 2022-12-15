@@ -27,6 +27,10 @@ let check program =
           ^ string_of_expr e
         in
         (* All binary operators require operands of the same type*)
+        if t1 = Unknown || t2 = Unknown then
+          (* Come back to check the type after we've inferred it *)
+          (Unknown, SUnknown)
+        else
         if t1 = t2 then
           (* Determine expression type based on operator and operand types *)
           let t =
@@ -46,9 +50,6 @@ let check program =
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
         else if op = Cons && t2 = List(t1) then
           (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
-        else if t1 = Unknown || t2 = Unknown then
-          (* Come back to check the type after we've inferred it *)
-          (Unknown, SUnknown)
         else raise (Failure err)
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
@@ -162,10 +163,15 @@ let check program =
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
             in
               let args' = List.map2 check_call param_types args in
-              let fname' = check_expr type_table func 
-              in (return_type, SFunApp(fname', args')) 
+                (* Check if any arguments are Unknown *)
+                if List.fold_left (||) false (List.map (fun shrex -> match shrex with (Unknown, _) -> true | _ -> false) args')
+                  (* If at least one is unknown, then the type of this call is Unknown *)
+                  then (Unknown, SUnknown)
+                else
+                  let fname' = check_expr type_table func 
+                  in (return_type, SFunApp(fname', args')) 
         in 
-          match func with
+          (match func with
             | Var fname ->
               (match type_of_identifier type_table fname with
                 | Function (param_types, return_type) -> 
@@ -185,6 +191,7 @@ let check program =
                     ( "This" ^ string_of_expr func
                     ^ " is not a function" ) )
               )
+          )
     | AssignRec (id, body, exp) ->
         let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
         if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))

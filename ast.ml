@@ -76,7 +76,7 @@ let rec string_of_typ = function
   | Bool -> "bool"
   | List(typ) -> "list<" ^ string_of_typ typ ^ ">"
   | Function(params, ret) -> "(" ^ string_of_list string_of_typ params ^ " -> " ^ string_of_typ ret ^ ")"
-  | Unknown -> raise (Failure("Type inference failed somewhere, this shouldn't be reached"))
+  | Unknown -> "unknown"
 
 let string_of_formal = function
   Formal(id, typ) -> id ^ ":" ^ string_of_typ typ
