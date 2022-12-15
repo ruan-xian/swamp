@@ -37,9 +37,15 @@ let check program =
             | (Less | Greater | Geq | Leq) when t1 = Int || t1 = Float ->
                 Bool
             | (And | Or) when t1 = Bool -> Bool
+            | Cat ->
+              (match t1 with
+                List(typ) -> List(typ)
+              | _ -> raise (Failure err))
             | _ -> raise (Failure err)
           in
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
+        else if op = Cons && t2 = List(t1) then
+          (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
         else raise (Failure err)
     | UnaryOp (op, e1) as ex -> (
         let t, e' = check_expr type_table e1 in
@@ -87,7 +93,7 @@ let check program =
               false
       in
       if check_list typed_list tlst then
-        (tlst, SListExp(typed_list))
+        (List(tlst), SListExp(typed_list))
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
@@ -123,9 +129,8 @@ let check program =
         (Function (types, t), SFunExp (formals, (t, e)))
     (* TODO *)
     | AssignRec (_, _, _)
-     | ListExp _
-     |ListComp (_, _)
-     |FunApp (_, _) ->
-        (Int, SIntLit 0)
+    |ListComp (_, _)
+    |FunApp (_, _) ->
+        (Int, SIntLit 0) 
   in
   match program with Expr e -> check_expr StringMap.empty e
