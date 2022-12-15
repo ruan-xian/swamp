@@ -85,9 +85,20 @@ let check program =
     | CharLit l -> (Char, SCharLit l)
     | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
+    | EmptyList(t) -> (List(t), SListExp([]))
     | ListExp(l) -> 
-      let typed_list = List.map (check_expr type_table) l in
-      let tlst = fst(List.hd typed_list) in
+      let typed_list = 
+        if l = [] then 
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          List.map (check_expr type_table) l 
+      in
+      let tlst =  
+        if l = [] then
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          fst(List.hd typed_list) 
+      in
       let rec check_list lst t =
         match lst with
           [] -> true
