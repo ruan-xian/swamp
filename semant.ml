@@ -47,16 +47,21 @@ let check program =
         else if op = Cons && t2 = List(t1) then
           (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
         else raise (Failure err)
-    | UnaryOp (op, e1) as ex -> (
+    | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
-        match op with
+        let err = "Invalid operand type for expression " ^ string_of_expr ex in
+        (match op with
         | UMinus when t = Int || t = Float -> (t, SUnaryOp (op, (t, e')))
         | Not when t = Bool -> (t, SUnaryOp (op, (t, e')))
-        | _ ->
-            raise
-              (Failure
-                 ("Invalid operand type for expression " ^ string_of_expr ex)
-              ) )
+        | Head ->
+          (match t with
+            List(typ) ->  (typ, SUnaryOp (op, (t, e')))
+          | _ -> raise (Failure err))
+        | Tail ->
+          (match t with
+            List(typ) ->  (List(typ), SUnaryOp (op, (t, e')))
+          | _ -> raise (Failure err))
+        | _ -> raise (Failure err))
     | CondExp (condition, e1, e2) as ex ->
         let t, e' = check_expr type_table condition in
         if t = Bool then
