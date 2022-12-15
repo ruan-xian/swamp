@@ -98,13 +98,14 @@ expr:
   | LPAREN expr RPAREN { ParenExp($2) }
 
     // Lists
+  | LBRACKET typ RBRACKET { EmptyList($2) }
   | LBRACKET iter RBRACKET { ListExp($2) }
   | LBRACKET comp RBRACKET { $2 }
 
 iter:
     expr { [$1] }
   | expr SEMI iter { $1 :: $3 }
-  | typ  { [] }
+  |     { [] }
 
 comp:
     expr FOR ID IN expr qual { ListComp($1, CompFor($3, $5) :: $6) }

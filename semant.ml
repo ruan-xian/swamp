@@ -91,9 +91,20 @@ let check program =
     | CharLit l -> (Char, SCharLit l)
     | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
+    | EmptyList(t) -> (List(t), SListExp([]))
     | ListExp(l) -> 
-      let typed_list = List.map (check_expr type_table) l in
-      let tlst = fst(List.hd typed_list) in
+      let typed_list = 
+        if l = [] then 
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          List.map (check_expr type_table) l 
+      in
+      let tlst =  
+        if l = [] then
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          fst(List.hd typed_list) 
+      in
       let rec check_list lst t =
         match lst with
           [] -> true
@@ -138,7 +149,42 @@ let check program =
             [] formals
         in
         (Function (types, t), SFunExp (formals, (t, e)))
-    (* TODO *)
+    | FunApp (func, args) as fapp-> 
+        let check_func_app param_types return_type =
+          let param_length = List.length param_types in
+          if List.length args != param_length then
+            raise (Failure ("expecting " ^ string_of_int param_length ^
+                            " arguments in " ^ string_of_expr fapp))
+            else let check_call ft e =
+              let (et, e') = check_expr type_table e in
+              if ft = et || et = Unknown then (et, e') 
+              else raise (Failure ("illegal argument found " ^ string_of_typ et ^
+                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
+            in
+              let args' = List.map2 check_call param_types args in
+              let fname' = check_expr type_table func 
+              in (return_type, SFunApp(fname', args')) 
+        in 
+          match func with
+            | Var fname ->
+              (match type_of_identifier type_table fname with
+                | Function (param_types, return_type) -> 
+                  check_func_app param_types return_type
+                | Unknown -> (Unknown, SUnknown)
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
+            | _  -> 
+              let ftype, fexpr = check_expr type_table func in
+              (match ftype with 
+                | Function (param_types, return_type) -> check_func_app param_types return_type
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
     | AssignRec (id, body, exp) ->
         let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
         if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
@@ -146,8 +192,8 @@ let check program =
           let t_inferred, e_body' = check_expr (StringMap.add id t_inferred type_table) body in
           let t2, e2' = check_expr (StringMap.add id t_inferred type_table) exp in
             (t2, SAssignRec (id, (t_inferred, e_body'), (t2, e2')))
-    |ListComp (_, _)
-    |FunApp (_, _) ->
+    (* TODO *)
+    | ListComp (_, _) ->
         (Int, SIntLit 0) 
   in
   match program with Expr e -> check_expr StringMap.empty e

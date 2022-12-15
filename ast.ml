@@ -30,6 +30,7 @@ and expr =
   | CharLit of char
   | ParenExp of expr
   | ListExp of expr list
+  | EmptyList of typ 
   | ListComp of expr * qual list
   | FunExp of formal list * expr
   | FunApp of expr * expr list 
@@ -93,6 +94,7 @@ let rec string_of_expr = function
   | InfixOp(i1, op, i2) -> string_of_expr i1 ^ " " ^ string_of_op op ^ " " ^ string_of_expr i2
   | UnaryOp(op, i1) ->string_of_op op ^ " " ^ string_of_expr i1
   | ParenExp(e) ->  "(" ^ string_of_expr e ^ ")"
+  | EmptyList(t) -> "[" ^ string_of_typ t ^ "]"
   | ListExp(el) -> "[" ^ String.concat ";" (List.map string_of_expr el) ^ "]" 
   | ListComp(e1, ql) -> "[" ^ string_of_expr e1 ^ " " ^ String.concat " " (List.map string_of_qual ql) ^ "]"
   | FunExp(fs, e) -> "fun(" ^ string_of_list string_of_formal fs ^ ") -> " ^ string_of_expr e
