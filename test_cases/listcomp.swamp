@@ -1,4 +1,0 @@
-0=| Just for printing |=0
-0=| Tests list comprehension |=0
-
-let l = [1; 2; 3; 4; 5] in head [x + 1 for x in l if x % 2] 
