@@ -52,9 +52,12 @@ let translate program =
         ( match op with
         | A.Add -> L.build_add
         | A.Sub -> L.build_sub
+        | A.Mul -> L.build_mul
+        | A.Div -> L.build_sdiv
+        | A.Mod -> L.build_srem
         (* TODO: PLACEHOLDERS *)
-        | Mul | Div | Mod | Eq | Less | Greater | Geq | Leq | Neq | And
-         |Or | Not | UMinus | Cat | Cons | Head | Tail ->
+        | Eq | Less | Greater | Geq | Leq | Neq | And | Or | Not | UMinus
+         |Cat | Cons | Head | Tail ->
             L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
