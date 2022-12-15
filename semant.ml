@@ -149,6 +149,9 @@ let check program =
             (fun l f -> match f with Formal (_, ty) -> ty :: l)
             [] formals
         in
+        if t = Unknown then
+          (Unknown, SUnknown)
+        else
         (Function (types, t), SFunExp (formals, (t, e)))
     | FunApp (func, args) as fapp-> 
         let check_func_app param_types return_type =
@@ -179,8 +182,7 @@ let check program =
                 | Unknown -> (Unknown, SUnknown)
                 | _ ->  raise
                   (Failure
-                    ( "This" ^ string_of_expr func
-                    ^ " is not a function" ) )
+                    (fname ^ " is not a function" ) )
               )
             | _  -> 
               let ftype, fexpr = check_expr type_table func in
@@ -193,11 +195,11 @@ let check program =
               )
           )
     | AssignRec (id, body, exp) ->
-        let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
+        let (t_inferred, _) = check_expr (StringMap.add id Unknown type_table) body in
         if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
         else 
-          let t_inferred, e_body' = check_expr (StringMap.add id t_inferred type_table) body in
-          let t2, e2' = check_expr (StringMap.add id t_inferred type_table) exp in
+          let (t_inferred, e_body') = check_expr (StringMap.add id t_inferred type_table) body in
+          let (t2, e2') = check_expr (StringMap.add id t_inferred type_table) exp in
             (t2, SAssignRec (id, (t_inferred, e_body'), (t2, e2')))
     (* TODO *)
     | ListComp (_, _) ->
