@@ -46,9 +46,13 @@ let check program =
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
         else if op = Cons && t2 = List(t1) then
           (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
+        else if t1 = Unknown || t2 = Unknown then
+          (* Come back to check the type after we've inferred it *)
+          (Unknown, SUnknown)
         else raise (Failure err)
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
+        if t = Unknown then (Unknown, SUnknown) else
         let err = "Invalid operand type for expression " ^ string_of_expr ex in
         (match op with
         | UMinus when t = Int || t = Float -> (t, SUnaryOp (op, (t, e')))
@@ -64,11 +68,13 @@ let check program =
         | _ -> raise (Failure err))
     | CondExp (condition, e1, e2) as ex ->
         let t, e' = check_expr type_table condition in
-        if t = Bool then
+        if t = Bool || t = Unknown then
           let t1, e1' = check_expr type_table e1 in
           let t2, e2' = check_expr type_table e2 in
           if t1 = t2 then (t1, SCondExp ((t, e'), (t1, e1'), (t2, e2')))
           else
+            if t1 = Unknown then (t2, SCondExp ((t, e'), (t1, e1'), (t2, e2'))) else
+            if t2 = Unknown then (t1, SCondExp ((t, e'), (t1, e1'), (t2, e2'))) else
             raise
               (Failure
                  ( "Both cases of expression " ^ string_of_expr ex
@@ -133,7 +139,13 @@ let check program =
         in
         (Function (types, t), SFunExp (formals, (t, e)))
     (* TODO *)
-    | AssignRec (_, _, _)
+    | AssignRec (id, body, exp) ->
+        let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
+        if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
+        else 
+          let t_inferred, e_body' = check_expr (StringMap.add id t_inferred type_table) body in
+          let t2, e2' = check_expr (StringMap.add id t_inferred type_table) exp in
+            (t2, SAssignRec (id, (t_inferred, e_body'), (t2, e2')))
     |ListComp (_, _)
     |FunApp (_, _) ->
         (Int, SIntLit 0) 

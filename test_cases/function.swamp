@@ -6,7 +6,7 @@ let f3(x:char) = x - 3 + 1 in
 
 let onion fact = fun(n:int) -> 
   if n == 0 then 1
-  else n * (fact     (n-1))
+  else n * (fact(n-1))
 in
 
 let onion fact2(n:list<list<int>>) =
