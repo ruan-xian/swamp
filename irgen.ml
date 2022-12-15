@@ -56,8 +56,15 @@ let translate program =
         | A.Div -> L.build_sdiv
         | A.Mod -> L.build_srem
         (* TODO: PLACEHOLDERS *)
-        | Eq | Less | Greater | Geq | Leq | Neq | And | Or | Not | UMinus
-         |Cat | Cons | Head | Tail ->
+        | Eq -> L.build_icmp L.Icmp.Eq
+        | Neq -> L.build_icmp L.Icmp.Ne
+        | Less -> L.build_icmp L.Icmp.Slt 
+        | Greater -> L.build_icmp L.Icmp.Sgt
+        | Geq -> L.build_icmp L.Icmp.Sge 
+        | Leq -> L.build_icmp L.Icmp.Sle 
+        | And -> L.build_and
+        | Or -> L.build_or
+        | Not | UMinus |Cat | Cons | Head | Tail ->
             L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
