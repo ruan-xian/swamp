@@ -196,7 +196,7 @@ let check program =
           )
     | AssignRec (id, body, exp) ->
         let (t_inferred, _) = check_expr (StringMap.add id Unknown type_table) body in
-        if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
+        if t_inferred = Unknown then raise (Failure("Failed to infer return type of " ^ id ^ " in declaration " ^ string_of_expr body))
         else 
           let (t_inferred, e_body') = check_expr (StringMap.add id t_inferred type_table) body in
           let (t2, e2') = check_expr (StringMap.add id t_inferred type_table) exp in
