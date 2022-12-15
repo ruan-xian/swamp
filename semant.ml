@@ -143,10 +143,44 @@ let check program =
             [] formals
         in
         (Function (types, t), SFunExp (formals, (t, e)))
+    | FunApp (func, args) as fapp-> 
+        let check_func_app param_types return_type =
+          let param_length = List.length param_types in
+          if List.length args != param_length then
+            raise (Failure ("expecting " ^ string_of_int param_length ^
+                            " arguments in " ^ string_of_expr fapp))
+            else let check_call ft e =
+              let (et, e') = check_expr type_table e in
+              if ft = et then (et, e') else raise (Failure ("illegal argument found " ^ string_of_typ et ^
+              " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
+            in
+              let args' = List.map2 check_call param_types args in
+              let fname' = check_expr type_table func 
+              in (return_type, SFunApp(fname', args')) 
+        in 
+          match func with
+            | Var fname ->
+              (match type_of_identifier type_table fname with
+                | Function (param_types, return_type) -> 
+                  check_func_app param_types return_type
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
+            | _  -> 
+              let ftype, fexpr = check_expr type_table func in
+              (match ftype with 
+                | Function (param_types, return_type) -> check_func_app param_types return_type
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
     (* TODO *)
-    | AssignRec (_, _, _)
-    |ListComp (_, _)
-    |FunApp (_, _) ->
-        (Int, SIntLit 0) 
+    (* | AssignRec (_, _, _)
+    |ListComp (_, _) *)
+    (* |FunApp (_, _) ->
+        (Int, SIntLit 0)  *)
   in
   match program with Expr e -> check_expr StringMap.empty e
