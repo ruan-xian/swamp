@@ -1,0 +1,3 @@
+0=| callling func with wrong number of arguments |=0
+let f1 = fun(x:int, y:int, z:int) -> (x - y) * z in
+let test = f1(2,4) in test

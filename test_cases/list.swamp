@@ -2,5 +2,5 @@
 0=| Tests list constructor, concat, head, tail operators |=0
 0=| Expected value: Not implemented |=0
 let l = 1 :: [2; 12 / 4; 1 + 3] in
-let e = [int] in 
-head l + head tail (l @ 3)
+let e = [int] in
+head l + head (tail (e @ [3]))
