@@ -1,0 +1,1 @@
+Fatal error: exception Failure("Failed to infer return type of f in declaration fun(n:int) -> f(n + 1)")

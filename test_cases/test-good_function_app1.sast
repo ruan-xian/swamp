@@ -1,0 +1,1 @@
+(int : let f1 = ((int, int, int -> int) : fun(x:int, y:int, z:int) -> (int : (int : (int : x) - (int : y)) * (int : z))) in (int : let test = (int : ((int, int, int -> int) : f1)((int : 2), (int : 3), (int : 4))) in (int : test)))
