@@ -1,0 +1,5 @@
+(
+  fun( f:(int->int), x:int  ) -> 
+    f(2*x)
+)
+( ( fun(y:int)->2*y ), 3 )
