@@ -111,6 +111,21 @@ let check program =
       if check_list typed_list tlst then
         (List(tlst), SListExp(typed_list))
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
+    | ListComp (e, ql) ->
+        let check_comp m q = 
+          let t, e' = check_qual m q in
+          match t with
+            Bool -> (m, (t, e'))
+          | _ -> 
+            (match e' with
+              SCompFor(id, _) -> ((StringMap.add id t m), (t, e'))
+            | _ -> raise(Failure("If you're seeing this, idk why")))
+        in
+        let comp_map, typed_qlst = 
+                        List.fold_left_map check_comp type_table ql
+        in
+        let t, se = check_expr comp_map e in
+        (List(t), SListComp((t, se), typed_qlst))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
         let t2, e2' = check_expr (StringMap.add id t1 type_table) exp in
@@ -145,8 +160,20 @@ let check program =
         (Function (types, t), SFunExp (formals, (t, e)))
     (* TODO *)
     | AssignRec (_, _, _)
-    |ListComp (_, _)
     |FunApp (_, _) ->
         (Int, SIntLit 0) 
+
+  and check_qual type_table : qual -> squal = function
+      CompFor(id, e) as cf ->
+        let t, e' = check_expr type_table e in 
+        (match t with
+          List(t') -> (t', SCompFor(id, (t, e'))) 
+        | _ -> raise(Failure("Invalid list comprehension expression: " ^ string_of_qual cf)))
+    | CompIf(e) as ci ->
+        let t, e' = check_expr type_table e in 
+        (match t with
+          Bool -> (Bool, SCompIf(Bool, e'))
+        | _ -> raise(Failure("Invalid list comprehension expression: " ^ string_of_qual ci)))
+
   in
   match program with Expr e -> check_expr StringMap.empty e
