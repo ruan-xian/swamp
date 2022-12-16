@@ -48,7 +48,7 @@ let check program =
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
         | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
             (String, SInfixOp ((t1, e1'), op, (t2, e2')))
-        | false when (if op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
+        | false when (op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
         | _ -> raise (Failure err))
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
