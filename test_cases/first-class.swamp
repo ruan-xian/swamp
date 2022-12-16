@@ -1,5 +1,5 @@
 (
-  fun( f:(int->int), x:int  ) -> 
-    f(2*x)
+  fun( f:(->int)) -> 
+    f() + 3
 )
-( ( fun(y:int)->2*y ), 3 )
+( ( fun()->2 ) )

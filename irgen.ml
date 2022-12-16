@@ -91,9 +91,13 @@ let translate program =
                (fun f -> match f with A.Formal (_, ty) -> ltype_of_typ ty)
                formals )
         in
-        let ret_type = L.type_of (build_expr e) in
+        let ret = build_expr e in
+        let ret_type = L.type_of ret in
         let ftype = L.function_type ret_type formal_types in
-        L.define_function "tmp" ftype the_module
+        let f = L.define_function "tmp" ftype the_module in
+        let body_bb = L.append_block context "body" f in
+        ignore (L.build_ret ret (L.builder_at_end context body_bb));
+        f
     | SFunApp (fexp, args) ->
         let f = build_expr fexp in
         let llargs = List.map build_expr args in
