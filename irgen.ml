@@ -28,14 +28,11 @@ let translate program =
   let ltype_of_typ = function
     | A.Int -> i32_t
     | A.Bool -> i1_t
-    | A.Float -> float_t (* TODO: placeholder so exhaust etc. *)
-    | A.Char | A.String | A.List _ | A.Function (_, _) -> i32_t
-  in
-  (* the reverse of the above mapping *)
-  let typ_of_ltype = function
-    | i32_t -> A.Int
-    | i1_t -> A.Bool
-    | float_t -> A.Float (* TODO: placeholder so exhaust etc. *)
+    | A.Float -> float_t
+    | A.Char -> i8_t
+    | A.String -> L.pointer_type i8_t
+    (* TODO: placeholder so exhaust etc. *)
+    | A.Float | A.List _ | A.Function (_, _) -> i32_t
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i1_t (Array.of_list []) in
@@ -55,6 +52,8 @@ let translate program =
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
+    | SCharLit c -> L.const_int i8_t (Char.code c)
+    | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 and e2' = build_expr e2 in
         (* t1 == t2 bc we semanted *)
@@ -118,8 +117,12 @@ let translate program =
           | A.Float, _ -> L.build_fneg )
         | Not -> L.build_not )
           e1' "tmp" builder
-    | SCondExp (_, _, _)
-     |SAssign (_, _, _)
+    | SCondExp (condition, e1, e2) ->
+        let cond = build_expr condition
+        and e1' = build_expr e1
+        and e2' = build_expr e2 in
+        L.build_select cond e1' e2' "tmp" builder
+    | SAssign (_, _, _)
      |SAssignRec (_, _, _)
      |SVar _ | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
