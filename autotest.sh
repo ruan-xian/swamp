@@ -91,12 +91,18 @@ Check() {
 
     generatedfiles=""
 
+	if [ $sast -eq 0] ; then
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$SWAMP" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
     Run "$CC" "-o" "${basename}.exe" "${basename}.s" "$PRINTBIG" &&
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
+	else
+    generatedfiles="$generatedfiles ${basename}.sast" &&
+    Run "$SWAMP" "-s $1" ">" "${basename}.sast" &&
+    Compare ${basename}.sast ${reffile}.sast ${basename}.diff
+	fi
 
     # Report the status and clean up the generated files
 
@@ -115,8 +121,8 @@ Check() {
 CheckFail() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.mc//'`
-    reffile=`echo $1 | sed 's/.mc$//'`
+                             s/.swamp//'`
+    reffile=`echo $1 | sed 's/.swamp$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -127,7 +133,7 @@ CheckFail() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-    RunFail "$SWAMP" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
+    RunFail "$SWAMP -s" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
     Compare ${basename}.err ${reffile}.err ${basename}.diff
 
     # Report the status and clean up the generated files
@@ -168,20 +174,15 @@ LLIFail() {
 
 which "$LLI" >> $globallog || LLIFail
 
-if [ $# -ge 1 ]
-then
-    files=$@
-else
-    files="test_cases/test_*.swamp test_cases/bad_*.swamp"
-fi
+files="test_cases/test-*.swamp test_cases/bad-*.swamp"
 
 for file in $files
 do
     case $file in
-	*test_*)
+	*test-*)
 	    Check $file 2>> $globallog
 	    ;;
-	*bad_*)
+	*bad-*)
 	    CheckFail $file 2>> $globallog
 	    ;;
 	*)
