@@ -172,7 +172,7 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test_*.swamp tests/bad_*.swamp"
+    files="test_cases/test_*.swamp test_cases/bad_*.swamp"
 fi
 
 for file in $files
