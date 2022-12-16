@@ -82,27 +82,27 @@ let translate program =
         | Eq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Eq
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Oeq )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq )
         | Neq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Ne
-          | A.Float, _ -> L.build_fcmp L.Fcmp.One )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Une )
         | Less -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Slt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Olt )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult )
         | Greater -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sgt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ogt )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt )
         | Geq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sge
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Oge )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge )
         | Leq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sle
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ole )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule )
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
