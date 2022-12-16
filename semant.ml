@@ -26,14 +26,12 @@ let check program =
           ^ string_of_op op ^ " " ^ string_of_typ t2 ^ " in "
           ^ string_of_expr e
         in
-        (* char + char *)
         (* All binary operators require operands of the same type*)
-        (match t1 = t2 with
-        | true -> 
+        if t1 = t2 then
+          (* Determine expression type based on operator and operand types *)
           let t =
             match op with
               Add when t1 = String -> String
-            | Add when t1 = Char -> String 
             | (Add | Sub | Mul | Div | Mod) when t1 = Int || t1 = Float -> t1
             | Eq | Neq -> Bool
             | (Less | Greater | Geq | Leq) when t1 = Int || t1 = Float ->
@@ -42,9 +40,7 @@ let check program =
             | _ -> raise (Failure err)
           in
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
-        | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
-            (String, SInfixOp ((t1, e1'), op, (t2, e2')))
-        | _ -> raise (Failure err))
+        else raise (Failure err)
     | UnaryOp (op, e1) as ex -> (
         let t, e' = check_expr type_table e1 in
         match op with
