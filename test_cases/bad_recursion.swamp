@@ -1,0 +1,3 @@
+let onion f = fun(n:int) ->
+  f(n+1)
+in f(0)
