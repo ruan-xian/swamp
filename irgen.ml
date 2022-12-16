@@ -64,7 +64,7 @@ let translate program =
         | Leq -> L.build_icmp L.Icmp.Sle 
         | And -> L.build_and 
         | Or -> L.build_or
-        | Not | UMinus |Cat | Cons | Head | Tail ->
+        |Cat | Cons | Head | Tail ->
             L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
@@ -74,7 +74,9 @@ let translate program =
         | UMinus -> L.build_neg
         | Not -> L.build_not
         ) e1' "tmp" builder
-     |SCondExp (_, _, _)
+     |SCondExp (condition, e1, e2) -> 
+        let cond = build_expr condition and e1' = build_expr e1 and e2' = build_expr e2 in
+          L.build_select cond e1' e2' "tmp" builder
      |SAssign (_, _, _)
      |SAssignRec (_, _, _)
      |SVar _ | SFloatLit _ | SStringLit _ | SCharLit _ | SParenExp _
