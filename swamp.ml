@@ -1,4 +1,4 @@
-type action = Ast | Sast (*| LLVM_IR*)
+type action = Ast | Sast | LLVM_IR
 
 let () =
   let action = ref Ast in
@@ -6,7 +6,7 @@ let () =
   let speclist = [
     ("-a", Arg.Unit (set_action Ast), "Print the AST");
     ("-s", Arg.Unit (set_action Sast), "Print the SAST");
-    (* ("-l", Arg.Unit (set_action LLVM_IR), "Print the generated LLVM IR"); *)
+    ("-l", Arg.Unit (set_action LLVM_IR), "Print the generated LLVM IR");
   ] in
   let usage_msg = "usage: ./swamp.native [-a|-s|-l] [file.swamp]" in
   let channel = ref stdin in
@@ -21,4 +21,4 @@ let () =
     match !action with
       Ast     -> ()
     | Sast    -> print_string ((Sast.string_of_shrexpr sast) ^ "\n")
-    (* | LLVM_IR -> print_string (Llvm.string_of_llmodule (Irgen.translate sast)) *)
+    | LLVM_IR -> print_string (Llvm.string_of_llmodule (Irgen.translate sast))
