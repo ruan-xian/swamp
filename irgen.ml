@@ -46,7 +46,7 @@ let translate program =
      a tuple of (value, new_builder) but i am not going to write this in just
      yet bc i am not 100% positive this is true, something something about
      how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((_, e) : shrexpr) =
+  let rec build_expr ((t, e) : shrexpr) =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -61,43 +61,40 @@ let translate program =
         (* TODO: PLACEHOLDERS *)
         | Eq -> L.build_icmp L.Icmp.Eq
         | Neq -> L.build_icmp L.Icmp.Ne
-        | Less -> L.build_icmp L.Icmp.Slt 
+        | Less -> L.build_icmp L.Icmp.Slt
         | Greater -> L.build_icmp L.Icmp.Sgt
-        | Geq -> L.build_icmp L.Icmp.Sge 
-        | Leq -> L.build_icmp L.Icmp.Sle 
-        | And -> L.build_and 
+        | Geq -> L.build_icmp L.Icmp.Sge
+        | Leq -> L.build_icmp L.Icmp.Sle
+        | And -> L.build_and
         | Or -> L.build_or
-        | Not | UMinus |Cat | Cons | Head | Tail ->
-            L.build_add )
+        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
-    | SUnaryOp (op, e1) -> 
-        let e1' = build_expr e1 in 
-        ( match op with 
-        | UMinus -> L.build_neg
-        | Not -> L.build_not
-        ) e1' "tmp" builder
-     |SCondExp (_, _, _)
+    | SUnaryOp (op, e1) ->
+        let e1' = build_expr e1 in
+        (match op with UMinus -> L.build_neg | Not -> L.build_not)
+          e1' "tmp" builder
+    | SCondExp (_, _, _)
      |SAssign (_, _, _)
      |SAssignRec (_, _, _)
      |SVar _ | SFloatLit _ | SStringLit _ | SCharLit _ | SParenExp _
      |SListExp _
      |SListComp (_, _) ->
         L.const_int i32_t 0
-    | SFunExp (formals, e) ->
-        let formal_types =
-          Array.of_list
-            (List.map
-               (fun f -> match f with A.Formal (_, ty) -> ltype_of_typ ty)
-               formals )
-        in
-        let ret = build_expr e in
-        let ret_type = L.type_of ret in
-        let ftype = L.function_type ret_type formal_types in
-        let f = L.define_function "tmp" ftype the_module in
-        let body_bb = L.append_block context "body" f in
-        ignore (L.build_ret ret (L.builder_at_end context body_bb));
-        f
+    | SFunExp (formals, e) -> (
+      match t with
+      | Function (formal_types, ret_type) ->
+          let lformal_types =
+            Array.of_list (List.map (fun t -> ltype_of_typ t) formal_types)
+          in
+          let ftype =
+            L.function_type (ltype_of_typ ret_type) lformal_types
+          in
+          let f = L.define_function "tmp" ftype the_module in
+          let body_bb = L.append_block context "body" f in
+          ignore
+            (L.build_ret (build_expr e) (L.builder_at_end context body_bb)) ;
+          f )
     | SFunApp (fexp, args) ->
         let f = build_expr fexp in
         let llargs = List.map build_expr args in
