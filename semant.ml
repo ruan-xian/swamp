@@ -28,6 +28,11 @@ let check program =
         in
         (* char + char *)
         (* All binary operators require operands of the same type*)
+        if t1 = Unknown || t2 = Unknown then
+          (* Come back to check the type after we've inferred it *)
+          (Unknown, SUnknown)
+        else
+          (* Determine expression type based on operator and operand types *)
         (match t1 = t2 with
         | true -> 
           let t =
@@ -52,6 +57,7 @@ let check program =
         | _ -> raise (Failure err))
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
+        if t = Unknown then (Unknown, SUnknown) else
         let err = "Invalid operand type for expression " ^ string_of_expr ex in
         (match op with
         | UMinus when t = Int || t = Float -> (t, SUnaryOp (op, (t, e')))
@@ -67,11 +73,13 @@ let check program =
         | _ -> raise (Failure err))
     | CondExp (condition, e1, e2) as ex ->
         let t, e' = check_expr type_table condition in
-        if t = Bool then
+        if t = Bool || t = Unknown then
           let t1, e1' = check_expr type_table e1 in
           let t2, e2' = check_expr type_table e2 in
           if t1 = t2 then (t1, SCondExp ((t, e'), (t1, e1'), (t2, e2')))
           else
+            if t1 = Unknown then (t2, SCondExp ((t, e'), (t1, e1'), (t2, e2'))) else
+            if t2 = Unknown then (t1, SCondExp ((t, e'), (t1, e1'), (t2, e2'))) else
             raise
               (Failure
                  ( "Both cases of expression " ^ string_of_expr ex
@@ -104,15 +112,19 @@ let check program =
       in
       let rec check_list lst t =
         match lst with
-          [] -> true
+          [] -> t
         | hd :: tl ->
             if t = fst(hd) then
               check_list tl t
             else
-              false
+              if fst(hd) = Unknown then Unknown
+              else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
       in
-      if check_list typed_list tlst then
+      let checked_type = check_list typed_list tlst in
+      if checked_type = tlst then
         (List(tlst), SListExp(typed_list))
+      else if checked_type = Unknown then
+        (Unknown, SUnknown)
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
     | ListComp (e, ql) ->
         let check_comp m q = 
@@ -160,6 +172,9 @@ let check program =
             (fun l f -> match f with Formal (_, ty) -> ty :: l)
             [] formals
         in
+        if t = Unknown then
+          (Unknown, SUnknown)
+        else
         (Function (types, t), SFunExp (formals, (t, e)))
     | FunApp (func, args) as fapp-> 
         let check_func_app param_types return_type =
@@ -169,22 +184,28 @@ let check program =
                             " arguments in " ^ string_of_expr fapp))
             else let check_call ft e =
               let (et, e') = check_expr type_table e in
-              if ft = et then (et, e') else raise (Failure ("illegal argument found " ^ string_of_typ et ^
-              " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
+              if ft = et || et = Unknown then (et, e') 
+              else raise (Failure ("illegal argument found " ^ string_of_typ et ^
+                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
             in
               let args' = List.map2 check_call param_types args in
-              let fname' = check_expr type_table func 
-              in (return_type, SFunApp(fname', args')) 
+                (* Check if any arguments are Unknown *)
+                if List.fold_left (||) false (List.map (fun shrex -> match shrex with (Unknown, _) -> true | _ -> false) args')
+                  (* If at least one is unknown, then the type of this call is Unknown *)
+                  then (Unknown, SUnknown)
+                else
+                  let fname' = check_expr type_table func 
+                  in (return_type, SFunApp(fname', args')) 
         in 
-          match func with
+          (match func with
             | Var fname ->
               (match type_of_identifier type_table fname with
                 | Function (param_types, return_type) -> 
                   check_func_app param_types return_type
+                | Unknown -> (Unknown, SUnknown)
                 | _ ->  raise
                   (Failure
-                    ( "This" ^ string_of_expr func
-                    ^ " is not a function" ) )
+                    (fname ^ " is not a function" ) )
               )
             | _  -> 
               let ftype, fexpr = check_expr type_table func in
@@ -195,10 +216,14 @@ let check program =
                     ( "This" ^ string_of_expr func
                     ^ " is not a function" ) )
               )
-    (* TODO *)
-    (* | AssignRec (_, _, _)
-       |FunApp (_, _) ->
-        (Int, SIntLit 0)  *)
+          )
+    | AssignRec (id, body, exp) ->
+        let (t_inferred, _) = check_expr (StringMap.add id Unknown type_table) body in
+        if t_inferred = Unknown then raise (Failure("Failed to infer return type of " ^ id ^ " in declaration " ^ string_of_expr body))
+        else 
+          let (t_inferred, e_body') = check_expr (StringMap.add id t_inferred type_table) body in
+          let (t2, e2') = check_expr (StringMap.add id t_inferred type_table) exp in
+            (t2, SAssignRec (id, (t_inferred, e_body'), (t2, e2')))
 
   and check_qual type_table : qual -> squal = function
       CompFor(id, e) as cf ->

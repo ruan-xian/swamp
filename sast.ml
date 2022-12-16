@@ -21,6 +21,7 @@ and sx =
   | SListComp of shrexpr * squal list
   | SFunExp of formal list * shrexpr
   | SFunApp of shrexpr * shrexpr list 
+  | SUnknown
 
 and sq =
   | SCompFor of string * shrexpr
@@ -46,6 +47,7 @@ let rec string_of_shrexpr (t, e) =
     | SListComp(e1, ql) -> "[" ^ string_of_shrexpr e1 ^ " " ^ String.concat " " (List.map string_of_squal ql) ^ "]"
     | SFunExp(fs, e) -> "fun(" ^ string_of_list string_of_formal fs ^ ") -> " ^ string_of_shrexpr e
     | SFunApp(s, es) -> string_of_shrexpr s ^ "(" ^ string_of_sargs es ^ ")"
+    | SUnknown -> "Unknown expression - type inference failed"
     ) ^ ")"
 
 and string_of_squal (t, q) = 

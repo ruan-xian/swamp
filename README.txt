@@ -101,7 +101,11 @@ conditional.swamp
 	Ryan Xu (rx2189):
 		SAST
 		Semant framework
-		Semant support for some basic types, assignment, operators, conditionals
+		Semant support for
+			Int, float, bool types and binary operators
+			Assignment
+			Return type inference for recursive functions
+			Conditional expressions
 	Alice Wang (aw3271): 
 		SAST + semant support for String and Char literals 
 		String and Char concatentation (semant.ml)

@@ -3,21 +3,6 @@ all : clean calc.out
 native: clean
 	ocamlbuild -pkgs llvm swamp.native
 
-##############################
-#
-# HW 2: Question 1
-#
-# Compilation: 
-# Option 1: Simply type "make" to compile the calculator (recommended, auto-test included)
-# Option 2: "ocamlbuild calc.native" will also build the calculator
-
-# For testing, you can run the binary executable and test it with
-# standard input via terminal.
-# Or use calc.tb (testbench file): you can modify the file directly
-# with the exprssion you want to test before make. After compiling
-# your executable successfully, the output of test case will be 
-# generate automatically in a file named calc.out
-
 test: clean calc 
 	sh run_tests.sh
 
