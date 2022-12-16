@@ -58,24 +58,25 @@ let translate program =
         (* TODO: PLACEHOLDERS *)
         | Eq -> L.build_icmp L.Icmp.Eq
         | Neq -> L.build_icmp L.Icmp.Ne
-        | Less -> L.build_icmp L.Icmp.Slt 
+        | Less -> L.build_icmp L.Icmp.Slt
         | Greater -> L.build_icmp L.Icmp.Sgt
-        | Geq -> L.build_icmp L.Icmp.Sge 
-        | Leq -> L.build_icmp L.Icmp.Sle 
-        | And -> L.build_and 
+        | Geq -> L.build_icmp L.Icmp.Sge
+        | Leq -> L.build_icmp L.Icmp.Sle
+        | And -> L.build_and
         | Or -> L.build_or
-        | Not | UMinus |Cat | Cons | Head | Tail ->
-            L.build_add )
+        | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
-    | SUnaryOp (op, e1) -> 
-        let e1' = build_expr e1 in 
-        ( match op with 
-        | UMinus -> L.build_neg
-        | Not -> L.build_not
-        ) e1' "tmp" builder
-     |SCondExp (_, _, _)
-     |SAssign (_, _, _)
+    | SUnaryOp (op, e1) ->
+        let e1' = build_expr e1 in
+        (match op with UMinus -> L.build_neg | Not -> L.build_not)
+          e1' "tmp" builder
+    | SCondExp (condition, e1, e2) ->
+        let cond = build_expr condition
+        and e1' = build_expr e1
+        and e2' = build_expr e2 in
+        L.build_select cond e1' e2' "tmp" builder
+    | SAssign (_, _, _)
      |SAssignRec (_, _, _)
      |SVar _ | SFloatLit _ | SStringLit _ | SCharLit _ | SParenExp _
      |SListExp _
