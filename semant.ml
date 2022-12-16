@@ -26,16 +26,19 @@ let check program =
           ^ string_of_op op ^ " " ^ string_of_typ t2 ^ " in "
           ^ string_of_expr e
         in
+        (* char + char *)
         (* All binary operators require operands of the same type*)
         if t1 = Unknown || t2 = Unknown then
           (* Come back to check the type after we've inferred it *)
           (Unknown, SUnknown)
         else
-        if t1 = t2 then
           (* Determine expression type based on operator and operand types *)
+        (match t1 = t2 with
+        | true -> 
           let t =
             match op with
               Add when t1 = String -> String
+            | Add when t1 = Char -> String 
             | (Add | Sub | Mul | Div | Mod) when t1 = Int || t1 = Float -> t1
             | Eq | Neq -> Bool
             | (Less | Greater | Geq | Leq) when t1 = Int || t1 = Float ->
@@ -48,9 +51,10 @@ let check program =
             | _ -> raise (Failure err)
           in
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
-        else if op = Cons && t2 = List(t1) then
-          (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
-        else raise (Failure err)
+        | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
+            (String, SInfixOp ((t1, e1'), op, (t2, e2')))
+        | false when (if op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
+        | _ -> raise (Failure err))
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
         if t = Unknown then (Unknown, SUnknown) else
@@ -108,15 +112,19 @@ let check program =
       in
       let rec check_list lst t =
         match lst with
-          [] -> true
+          [] -> t
         | hd :: tl ->
             if t = fst(hd) then
               check_list tl t
             else
-              false
+              if fst(hd) = Unknown then Unknown
+              else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
       in
-      if check_list typed_list tlst then
+      let checked_type = check_list typed_list tlst
+      if checked_type = tlst then
         (List(tlst), SListExp(typed_list))
+      else if checked_type = Unknown then
+        (Unknown, SUnknown)
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
