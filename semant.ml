@@ -17,7 +17,7 @@ let check program =
   in
   (* Return a semantically-checked expression, i.e., with a type *)
   let rec check_expr type_table : expr -> shrexpr = function
-    | InfixOp (e1, op, e2) as e ->
+    | InfixOp (e1, op, e2) as e -> (
         let t1, e1' = check_expr type_table e1
         and t2, e2' = check_expr type_table e2 in
         let err =
@@ -52,24 +52,25 @@ let check program =
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
         | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
             (String, SInfixOp ((t1, e1'), op, (t2, e2')))
-        | false when (op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
-        | _ -> raise (Failure err))
-    | UnaryOp (op, e1) as ex -> 
+        | false when op = Cons && t2 = List t1 ->
+            (t2, SInfixOp ((t1, e1'), Cons, (t2, e2')))
+        | _ -> raise (Failure err) )
+    | UnaryOp (op, e1) as ex -> (
         let t, e' = check_expr type_table e1 in
         if t = Unknown then (Unknown, SUnknown) else
         let err = "Invalid operand type for expression " ^ string_of_expr ex in
         (match op with
         | UMinus when t = Int || t = Float -> (t, SUnaryOp (op, (t, e')))
         | Not when t = Bool -> (t, SUnaryOp (op, (t, e')))
-        | Head ->
-          (match t with
-            List(typ) ->  (typ, SUnaryOp (op, (t, e')))
-          | _ -> raise (Failure err))
-        | Tail ->
-          (match t with
-            List(typ) ->  (List(typ), SUnaryOp (op, (t, e')))
-          | _ -> raise (Failure err))
-        | _ -> raise (Failure err))
+        | Head -> (
+          match t with
+          | List typ -> (typ, SUnaryOp (op, (t, e')))
+          | _ -> raise (Failure err) )
+        | Tail -> (
+          match t with
+          | List typ -> (List typ, SUnaryOp (op, (t, e')))
+          | _ -> raise (Failure err) )
+        | _ -> raise (Failure err) )
     | CondExp (condition, e1, e2) as ex ->
         let t, e' = check_expr type_table condition in
         if t = Bool || t = Unknown then
@@ -126,20 +127,20 @@ let check program =
         (Unknown, SUnknown)
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
     | ListComp (e, ql) ->
-        let check_comp m q = 
+        let check_comp m q =
           let t, e' = check_qual m q in
           match t with
-            Bool -> (m, (t, e'))
-          | _ -> 
-            (match e' with
-              SCompFor(id, _) -> ((StringMap.add id t m), (t, e'))
-            | _ -> raise(Failure("If you're seeing this, idk why")))
+          | Bool -> (m, (t, e'))
+          | _ -> (
+            match e' with
+            | SCompFor (id, _) -> (StringMap.add id t m, (t, e'))
+            | _ -> raise (Failure "If you're seeing this, idk why") )
         in
-        let comp_map, typed_qlst = 
-                        List.fold_left_map check_comp type_table ql
+        let comp_map, typed_qlst =
+          List.fold_left_map check_comp type_table ql
         in
         let t, se = check_expr comp_map e in
-        (List(t), SListComp((t, se), typed_qlst))
+        (List t, SListComp ((t, se), typed_qlst))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
         let t2, e2' = check_expr (StringMap.add id t1 type_table) exp in
@@ -167,15 +168,16 @@ let check program =
         in
         let t, e = check_expr new_map rhs in
         let types =
-          List.fold_left
-            (fun l f -> match f with Formal (_, ty) -> ty :: l)
-            [] formals
+          List.rev
+            (List.fold_left
+               (fun l f -> match f with Formal (_, ty) -> ty :: l)
+               [] formals )
         in
         if t = Unknown then
           (Unknown, SUnknown)
         else
         (Function (types, t), SFunExp (formals, (t, e)))
-    | FunApp (func, args) as fapp-> 
+    | FunApp (func, args) as fapp -> (
         let check_func_app param_types return_type =
           let param_length = List.length param_types in
           if List.length args != param_length then
