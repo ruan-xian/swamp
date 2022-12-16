@@ -22,11 +22,13 @@ let translate program =
   (* Get types from the context *)
   let i32_t = L.i32_type context
   and i8_t = L.i8_type context
-  and i1_t = L.i1_type context in
+  and i1_t = L.i1_type context
+  and float_t = L.float_type context in
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
     | A.Int -> i32_t
     | A.Bool -> i1_t
+    | A.Float -> float_t
     | A.Char -> i8_t
     | A.String -> L.pointer_type i8_t
     (* TODO: placeholder so exhaust etc. *)
@@ -49,31 +51,71 @@ let translate program =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
+    | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 and e2' = build_expr e2 in
+        (* t1 == t2 bc we semanted *)
         ( match op with
-        | A.Add -> L.build_add
-        | A.Sub -> L.build_sub
-        | A.Mul -> L.build_mul
-        | A.Div -> L.build_sdiv
-        | A.Mod -> L.build_srem
-        (* TODO: PLACEHOLDERS *)
-        | Eq -> L.build_icmp L.Icmp.Eq
-        | Neq -> L.build_icmp L.Icmp.Ne
-        | Less -> L.build_icmp L.Icmp.Slt
-        | Greater -> L.build_icmp L.Icmp.Sgt
-        | Geq -> L.build_icmp L.Icmp.Sge
-        | Leq -> L.build_icmp L.Icmp.Sle
+        | A.Add -> (
+          match e1 with
+          | A.Int, _ -> L.build_sub
+          | A.Float, _ -> L.build_fsub )
+        | A.Sub -> (
+          match e1 with
+          | A.Int, _ -> L.build_sub
+          | A.Float, _ -> L.build_fsub )
+        | A.Mul -> (
+          match e1 with
+          | A.Int, _ -> L.build_mul
+          | A.Float, _ -> L.build_fmul )
+        | A.Div -> (
+          match e1 with
+          | A.Int, _ -> L.build_sdiv
+          | A.Float, _ -> L.build_fdiv )
+        | A.Mod -> (
+          match e1 with
+          | A.Int, _ -> L.build_srem
+          | A.Float, _ -> L.build_frem )
+        | Eq -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Eq
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq )
+        | Neq -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Ne
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Une )
+        | Less -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Slt
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult )
+        | Greater -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Sgt
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt )
+        | Geq -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Sge
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge )
+        | Leq -> (
+          match e1 with
+          | A.Int, _ -> L.build_icmp L.Icmp.Sle
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule )
         | And -> L.build_and
         | Or -> L.build_or
-        | Cat | Cons | Head | Tail -> L.build_add )
+        (* TODO: PLACEHOLDERS *)
+        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 in
-        (match op with UMinus -> L.build_neg | Not -> L.build_not)
+        ( match op with
+        | UMinus -> (
+          match e1 with
+          | A.Int, _ -> L.build_neg
+          | A.Float, _ -> L.build_fneg )
+        | Not -> L.build_not )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
         let cond = build_expr condition
@@ -82,8 +124,7 @@ let translate program =
         L.build_select cond e1' e2' "tmp" builder
     | SAssign (_, _, _)
      |SAssignRec (_, _, _)
-     |SVar _ | SFloatLit _ | SStringLit _ | SCharLit _ | SParenExp _
-     |SListExp _
+     |SVar _ | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
      |SFunExp (_, _)
      |SFunApp (_, _) ->
