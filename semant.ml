@@ -26,12 +26,14 @@ let check program =
           ^ string_of_op op ^ " " ^ string_of_typ t2 ^ " in "
           ^ string_of_expr e
         in
+        (* char + char *)
         (* All binary operators require operands of the same type*)
-        if t1 = t2 then
-          (* Determine expression type based on operator and operand types *)
+        (match t1 = t2 with
+        | true -> 
           let t =
             match op with
               Add when t1 = String -> String
+            | Add when t1 = Char -> String 
             | (Add | Sub | Mul | Div | Mod) when t1 = Int || t1 = Float -> t1
             | Eq | Neq -> Bool
             | (Less | Greater | Geq | Leq) when t1 = Int || t1 = Float ->
@@ -44,12 +46,19 @@ let check program =
             | _ -> raise (Failure err)
           in
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
+<<<<<<< HEAD
         else if op = Cons && t2 = List(t1) then
           (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
         else if t1 = Unknown || t2 = Unknown then
           (* Come back to check the type after we've inferred it *)
           (Unknown, SUnknown)
         else raise (Failure err)
+=======
+        | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
+            (String, SInfixOp ((t1, e1'), op, (t2, e2')))
+        | false when (op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
+        | _ -> raise (Failure err))
+>>>>>>> main
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
         if t = Unknown then (Unknown, SUnknown) else
@@ -91,9 +100,20 @@ let check program =
     | CharLit l -> (Char, SCharLit l)
     | ParenExp(e)-> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
+    | EmptyList(t) -> (List(t), SListExp([]))
     | ListExp(l) -> 
-      let typed_list = List.map (check_expr type_table) l in
-      let tlst = fst(List.hd typed_list) in
+      let typed_list = 
+        if l = [] then 
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          List.map (check_expr type_table) l 
+      in
+      let tlst =  
+        if l = [] then
+          raise (Failure("Cannot declare untyped empty list"))
+        else
+          fst(List.hd typed_list) 
+      in
       let rec check_list lst t =
         match lst with
           [] -> true
@@ -106,6 +126,21 @@ let check program =
       if check_list typed_list tlst then
         (List(tlst), SListExp(typed_list))
       else raise (Failure("Inconsistent type in " ^ string_of_list string_of_expr l))
+    | ListComp (e, ql) ->
+        let check_comp m q = 
+          let t, e' = check_qual m q in
+          match t with
+            Bool -> (m, (t, e'))
+          | _ -> 
+            (match e' with
+              SCompFor(id, _) -> ((StringMap.add id t m), (t, e'))
+            | _ -> raise(Failure("If you're seeing this, idk why")))
+        in
+        let comp_map, typed_qlst = 
+                        List.fold_left_map check_comp type_table ql
+        in
+        let t, se = check_expr comp_map e in
+        (List(t), SListComp((t, se), typed_qlst))
     | Assign (id, rhs, exp) ->
         let t1, e1' = check_expr type_table rhs in
         let t2, e2' = check_expr (StringMap.add id t1 type_table) exp in
@@ -138,7 +173,42 @@ let check program =
             [] formals
         in
         (Function (types, t), SFunExp (formals, (t, e)))
+    | FunApp (func, args) as fapp-> 
+        let check_func_app param_types return_type =
+          let param_length = List.length param_types in
+          if List.length args != param_length then
+            raise (Failure ("expecting " ^ string_of_int param_length ^
+                            " arguments in " ^ string_of_expr fapp))
+            else let check_call ft e =
+              let (et, e') = check_expr type_table e in
+              if ft = et then (et, e') else raise (Failure ("illegal argument found " ^ string_of_typ et ^
+              " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))
+            in
+              let args' = List.map2 check_call param_types args in
+              let fname' = check_expr type_table func 
+              in (return_type, SFunApp(fname', args')) 
+        in 
+          match func with
+            | Var fname ->
+              (match type_of_identifier type_table fname with
+                | Function (param_types, return_type) -> 
+                  check_func_app param_types return_type
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
+            | _  -> 
+              let ftype, fexpr = check_expr type_table func in
+              (match ftype with 
+                | Function (param_types, return_type) -> check_func_app param_types return_type
+                | _ ->  raise
+                  (Failure
+                    ( "This" ^ string_of_expr func
+                    ^ " is not a function" ) )
+              )
     (* TODO *)
+<<<<<<< HEAD
     | AssignRec (id, body, exp) ->
         let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
         if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
@@ -149,5 +219,23 @@ let check program =
     |ListComp (_, _)
     |FunApp (_, _) ->
         (Int, SIntLit 0) 
+=======
+    (* | AssignRec (_, _, _)
+       |FunApp (_, _) ->
+        (Int, SIntLit 0)  *)
+
+  and check_qual type_table : qual -> squal = function
+      CompFor(id, e) as cf ->
+        let t, e' = check_expr type_table e in 
+        (match t with
+          List(t') -> (t', SCompFor(id, (t, e'))) 
+        | _ -> raise(Failure("Invalid list comprehension expression: " ^ string_of_qual cf)))
+    | CompIf(e) as ci ->
+        let t, e' = check_expr type_table e in 
+        (match t with
+          Bool -> (Bool, SCompIf(Bool, e'))
+        | _ -> raise(Failure("Invalid list comprehension expression: " ^ string_of_qual ci)))
+
+>>>>>>> main
   in
   match program with Expr e -> check_expr StringMap.empty e

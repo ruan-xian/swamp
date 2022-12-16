@@ -87,7 +87,7 @@ conditional.swamp
 	Alice Wang (aw3271):
 		Assigned task: Print out AST structure
 		Added printing support to ast.ml 
-		Automated testing for parse printing (run_print_tests.sh, revised Makefile)
+		Automated testing for parse printing (run_print_tests.sh, print_test.ml, revised Makefile)
 	Ellen Guo (ekg2134):
 		Parser foundations + operators (if/then/else, worked with Ryan on arithmetic)
 		Reworked grammar from initial LRM 
@@ -102,3 +102,8 @@ conditional.swamp
 		SAST
 		Semant framework
 		Semant support for some basic types, assignment, operators, conditionals
+	Alice Wang (aw3271): 
+		SAST + semant support for String and Char literals 
+		String and Char concatentation (semant.ml)
+		Automated testing for semant checking (run_semant_tests.sh, revised Makefile)
+		IR Gen for non-arithmetic Infix Op's and Unary Ops
