@@ -25,6 +25,7 @@ globallog=testall.log
 rm -f $globallog
 error=0
 globalerror=0
+globalerrorcount=0
 
 keep=0
 sast=0
@@ -115,6 +116,7 @@ Check() {
     else
 	echo "###### FAILED" 1>&2
 	globalerror=$error
+	globalerrorcount=$((globalerrorcount + 1))
     fi
 }
 
@@ -147,6 +149,7 @@ CheckFail() {
     else
 	echo "###### FAILED" 1>&2
 	globalerror=$error
+	globalerrorcount=$((globalerrorcount + 1))
     fi
 }
 
@@ -163,6 +166,11 @@ while getopts kdpsh c; do
 	    ;;
     esac
 done
+
+if [ $sast -eq 0 ] ; then
+	echo "Only SAST checking (-s) is supported right now. Check back later"
+	exit 1
+fi
 
 shift `expr $OPTIND - 1`
 
@@ -191,5 +199,11 @@ do
 	    ;;
     esac
 done
+
+if [ $globalerrorcount -eq 0 ] ; then
+	echo "All cases passed!"
+else
+	echo "\nFAILED $globalerrorcount cases"
+fi
 
 exit $globalerror
