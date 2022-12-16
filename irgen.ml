@@ -23,12 +23,15 @@ let translate program =
   let i32_t = L.i32_type context
   and i8_t = L.i8_type context
   and i1_t = L.i1_type context in
-  (* Return the LLVM type for a MicroC type *)
-  let ltype_of_typ = function
+  (* Return the LLVM type for a Swamp type *)
+  let rec ltype_of_typ = function
     | A.Int -> i32_t
     | A.Bool -> i1_t
     (* TODO: placeholder so exhaust etc. *)
-    | A.Float | A.Char | A.String | A.List _ | A.Function (_, _) -> i32_t
+    | A.Float | A.Char | A.String | A.List _ -> i32_t
+    | A.Function (types, ret) ->
+        let formal_types = Array.of_list (List.map ltype_of_typ types) in
+        L.function_type (ltype_of_typ ret) formal_types
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i1_t (Array.of_list []) in
@@ -79,10 +82,22 @@ let translate program =
      |SAssignRec (_, _, _)
      |SVar _ | SFloatLit _ | SStringLit _ | SCharLit _ | SParenExp _
      |SListExp _
-     |SListComp (_, _)
-     |SFunExp (_, _)
-     |SFunApp (_, _) ->
+     |SListComp (_, _) ->
         L.const_int i32_t 0
+    | SFunExp (formals, e) ->
+        let formal_types =
+          Array.of_list
+            (List.map
+               (fun f -> match f with A.Formal (_, ty) -> ltype_of_typ ty)
+               formals )
+        in
+        let ret_type = L.type_of (build_expr e) in
+        let ftype = L.function_type ret_type formal_types in
+        L.define_function "tmp" ftype the_module
+    | SFunApp (fexp, args) ->
+        let f = build_expr fexp in
+        let llargs = List.map build_expr args in
+        L.build_call f (Array.of_list llargs) "result" builder
   in
   ignore (L.build_ret (build_expr program) builder) ;
   the_module
