@@ -46,19 +46,10 @@ let check program =
             | _ -> raise (Failure err)
           in
           (t, SInfixOp ((t1, e1'), op, (t2, e2')))
-<<<<<<< HEAD
-        else if op = Cons && t2 = List(t1) then
-          (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
-        else if t1 = Unknown || t2 = Unknown then
-          (* Come back to check the type after we've inferred it *)
-          (Unknown, SUnknown)
-        else raise (Failure err)
-=======
         | false when (t1 = Char && t2 = String )|| (t1 = String && t2 = Char) -> 
             (String, SInfixOp ((t1, e1'), op, (t2, e2')))
         | false when (op = Cons && t2 = List(t1)) -> (t2, SInfixOp((t1, e1'), Cons, (t2, e2')))
         | _ -> raise (Failure err))
->>>>>>> main
     | UnaryOp (op, e1) as ex -> 
         let t, e' = check_expr type_table e1 in
         if t = Unknown then (Unknown, SUnknown) else
@@ -208,18 +199,6 @@ let check program =
                     ^ " is not a function" ) )
               )
     (* TODO *)
-<<<<<<< HEAD
-    | AssignRec (id, body, exp) ->
-        let t_inferred, _ = check_expr (StringMap.add id Unknown type_table) body in
-        if t_inferred = Unknown then raise (Failure("Failed to infer type of " ^ id ^ " in declaration " ^ string_of_expr body))
-        else 
-          let t_inferred, e_body' = check_expr (StringMap.add id t_inferred type_table) body in
-          let t2, e2' = check_expr (StringMap.add id t_inferred type_table) exp in
-            (t2, SAssignRec (id, (t_inferred, e_body'), (t2, e2')))
-    |ListComp (_, _)
-    |FunApp (_, _) ->
-        (Int, SIntLit 0) 
-=======
     (* | AssignRec (_, _, _)
        |FunApp (_, _) ->
         (Int, SIntLit 0)  *)
@@ -236,6 +215,5 @@ let check program =
           Bool -> (Bool, SCompIf(Bool, e'))
         | _ -> raise(Failure("Invalid list comprehension expression: " ^ string_of_qual ci)))
 
->>>>>>> main
   in
   match program with Expr e -> check_expr StringMap.empty e
