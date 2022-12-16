@@ -2,6 +2,8 @@ open Ast
 
 type shrexpr = typ * sx
 
+and squal = typ * sq
+
 and sx =
     SInfixOp of shrexpr * operator * shrexpr
   | SUnaryOp of operator * shrexpr
@@ -20,7 +22,7 @@ and sx =
   | SFunExp of formal list * shrexpr
   | SFunApp of shrexpr * shrexpr list 
 
-and squal =
+and sq =
   | SCompFor of string * shrexpr
   | SCompIf of shrexpr
 
@@ -46,8 +48,9 @@ let rec string_of_shrexpr (t, e) =
     | SFunApp(s, es) -> string_of_shrexpr s ^ "(" ^ string_of_sargs es ^ ")"
     ) ^ ")"
 
-and string_of_squal = function
-  | SCompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_shrexpr itr 
+and string_of_squal (t, q) = 
+  match q with
+    SCompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_shrexpr itr 
   | SCompIf(e) -> "if " ^ string_of_shrexpr e
                    
 and string_of_sargs = function 
