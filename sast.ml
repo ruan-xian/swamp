@@ -2,6 +2,8 @@ open Ast
 
 type shrexpr = typ * sx
 
+and squal = typ * sq
+
 and sx =
     SInfixOp of shrexpr * operator * shrexpr
   | SUnaryOp of operator * shrexpr
@@ -21,7 +23,7 @@ and sx =
   | SFunApp of shrexpr * shrexpr list 
   | SUnknown
 
-and squal =
+and sq =
   | SCompFor of string * shrexpr
   | SCompIf of shrexpr
 
@@ -48,8 +50,9 @@ let rec string_of_shrexpr (t, e) =
     | SUnknown -> "Unknown expression - type inference failed"
     ) ^ ")"
 
-and string_of_squal = function
-  | SCompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_shrexpr itr 
+and string_of_squal (t, q) = 
+  match q with
+    SCompFor(s, itr) -> "for " ^ s ^ " in " ^ string_of_shrexpr itr 
   | SCompIf(e) -> "if " ^ string_of_shrexpr e
                    
 and string_of_sargs = function 

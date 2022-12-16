@@ -110,3 +110,4 @@ conditional.swamp
 		SAST + semant support for String and Char literals 
 		String and Char concatentation (semant.ml)
 		Automated testing for semant checking (run_semant_tests.sh, revised Makefile)
+		IR Gen for non-arithmetic Infix Op's and Unary Ops
