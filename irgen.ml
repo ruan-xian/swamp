@@ -28,8 +28,9 @@ let translate program =
     | A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Char -> i8_t
+    | A.String -> L.pointer_type i8_t
     (* TODO: placeholder so exhaust etc. *)
-    | A.Float | A.String | A.List _ | A.Function (_, _) -> i32_t
+    | A.Float | A.List _ | A.Function (_, _) -> i32_t
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i1_t (Array.of_list []) in
@@ -49,6 +50,7 @@ let translate program =
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SCharLit c -> L.const_int i8_t (Char.code c)
+    | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 and e2' = build_expr e2 in
         ( match op with
