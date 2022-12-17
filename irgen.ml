@@ -41,16 +41,6 @@ let translate program =
       (L.entry_block (L.define_function "main" ftype the_module))
   in
 
-  (* let var_table = StringMap.empty in *)
-  let add_var m id (t, n) =
-    let var = L.build_alloca (ltype_of_typ t) id builder
-    in StringMap.add id var m
-  in
-  let lookup n m = StringMap.find n m
-    with Not_found -> raise (Failure ("unrecognized var " ^ n))
-    in
-
-
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -58,7 +48,7 @@ let translate program =
      a tuple of (value, new_builder) but i am not going to write this in just
      yet bc i am not 100% positive this is true, something something about
      how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((_, e) : shrexpr) var_table =
+  let rec build_expr ((t, e) : shrexpr) var_table =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -134,10 +124,10 @@ let translate program =
         and e2' = build_expr e2 var_table in
         L.build_select cond e1' e2' "tmp" builder
     | SAssign (id, rhs, exp) -> let var = L.build_alloca (ltype_of_typ t) id builder in
-      let rhs' = build_expr rhs (StringMap.add id var var_table) in
-    (* ignore(add_var var_table id rhs);  *)
-    ignore(L.build_store rhs' var builder); rhs'
-    | SVar var -> L.build_load (lookup var var_table) var builder
+      let temp = StringMap.add id var var_table in  
+      let rhs' = build_expr rhs var_table in
+      ignore(L.build_store rhs' var builder); build_expr exp temp
+    | SVar var -> L.build_load (StringMap.find var var_table) var builder
      |SAssignRec (_, _, _)
      | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
