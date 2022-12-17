@@ -25,7 +25,7 @@ let translate program =
   and i1_t = L.i1_type context
   and float_t = L.float_type context in
   (* Return the LLVM type for a Swamp type *)
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
     | A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> float_t
@@ -125,11 +125,6 @@ let translate program =
         and e1' = build_expr e1
         and e2' = build_expr e2 in
         L.build_select cond e1' e2' "tmp" builder
-    | SAssign (_, _, _)
-     |SAssignRec (_, _, _)
-     |SVar _ | SParenExp _ | SListExp _
-     |SListComp (_, _) ->
-        L.const_int i32_t 0
     | SFunExp (formals, e) -> (
       match t with
       | Function (formal_types, ret_type) ->
@@ -148,6 +143,11 @@ let translate program =
         let f = build_expr fexp in
         let llargs = List.map build_expr args in
         L.build_call f (Array.of_list llargs) "result" builder
+        | SAssign (_, _, _)
+        |SAssignRec (_, _, _)
+        |SVar _ | SParenExp _ | SListExp _ | SUnknown
+        |SListComp (_, _) ->
+           L.const_int i32_t 0
   in
   ignore (L.build_ret (build_expr program) builder) ;
   the_module
