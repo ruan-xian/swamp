@@ -40,6 +40,17 @@ let translate program =
     L.builder_at_end context
       (L.entry_block (L.define_function "main" ftype the_module))
   in
+
+  let var_table = StringMap.empty in
+  let add_var m id (t, n) =
+    let var = L.build_alloca (ltype_of_typ t) id builder
+    in StringMap.add id var m
+  in
+  let lookup n = StringMap.find n var_table
+    (* with Not_found -> raise (Failure ("unrecognized var " ^ n)) *)
+    in
+
+
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -122,9 +133,12 @@ let translate program =
         and e1' = build_expr e1
         and e2' = build_expr e2 in
         L.build_select cond e1' e2' "tmp" builder
-    | SAssign (_, _, _)
+    | SAssign (id, rhs, exp) -> let rhs' = build_expr rhs in
+    ignore(add_var var_table id rhs); 
+    ignore(L.build_store rhs' (lookup id) builder); rhs'
+    | SVar var -> L.build_load (lookup var) var builder
      |SAssignRec (_, _, _)
-     |SVar _ | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
+     | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
      |SFunExp (_, _)
      |SFunApp (_, _) ->
