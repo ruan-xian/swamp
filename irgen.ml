@@ -41,13 +41,13 @@ let translate program =
       (L.entry_block (L.define_function "main" ftype the_module))
   in
 
-  let var_table = StringMap.empty in
+  (* let var_table = StringMap.empty in *)
   let add_var m id (t, n) =
     let var = L.build_alloca (ltype_of_typ t) id builder
     in StringMap.add id var m
   in
-  let lookup n = StringMap.find n var_table
-    (* with Not_found -> raise (Failure ("unrecognized var " ^ n)) *)
+  let lookup n m = StringMap.find n m
+    with Not_found -> raise (Failure ("unrecognized var " ^ n))
     in
 
 
@@ -58,7 +58,7 @@ let translate program =
      a tuple of (value, new_builder) but i am not going to write this in just
      yet bc i am not 100% positive this is true, something something about
      how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((_, e) : shrexpr) =
+  let rec build_expr ((_, e) : shrexpr) var_table =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -66,7 +66,7 @@ let translate program =
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
-        let e1' = build_expr e1 and e2' = build_expr e2 in
+        let e1' = build_expr e1 var_table and e2' = build_expr e2 var_table in
         (* t1 == t2 bc we semanted *)
         ( match op with
         | A.Add -> (
@@ -120,7 +120,7 @@ let translate program =
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
     | SUnaryOp (op, e1) ->
-        let e1' = build_expr e1 in
+        let e1' = build_expr e1 var_table in
         ( match op with
         | UMinus -> (
           match e1 with
@@ -129,14 +129,15 @@ let translate program =
         | Not -> L.build_not )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
-        let cond = build_expr condition
-        and e1' = build_expr e1
-        and e2' = build_expr e2 in
+        let cond = build_expr condition var_table
+        and e1' = build_expr e1 var_table
+        and e2' = build_expr e2 var_table in
         L.build_select cond e1' e2' "tmp" builder
-    | SAssign (id, rhs, exp) -> let rhs' = build_expr rhs in
-    ignore(add_var var_table id rhs); 
-    ignore(L.build_store rhs' (lookup id) builder); rhs'
-    | SVar var -> L.build_load (lookup var) var builder
+    | SAssign (id, rhs, exp) -> let var = L.build_alloca (ltype_of_typ t) id builder in
+      let rhs' = build_expr rhs (StringMap.add id var var_table) in
+    (* ignore(add_var var_table id rhs);  *)
+    ignore(L.build_store rhs' var builder); rhs'
+    | SVar var -> L.build_load (lookup var var_table) var builder
      |SAssignRec (_, _, _)
      | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
@@ -144,5 +145,5 @@ let translate program =
      |SFunApp (_, _) ->
         L.const_int i32_t 0
   in
-  ignore (L.build_ret (build_expr program) builder) ;
+  ignore (L.build_ret (build_expr program StringMap.empty) builder) ;
   the_module
