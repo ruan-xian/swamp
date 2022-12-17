@@ -16,7 +16,7 @@ LLC="llc"
 CC="cc"
 
 # Path to the swamp compiler. 
-SWAMP="./swamp.native"
+SWAMP="./swamp"
 
 # Set time limit for all operations
 ulimit -t 30
