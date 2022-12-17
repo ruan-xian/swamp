@@ -34,7 +34,7 @@ let translate program =
     | A.String -> L.pointer_type i8_t
     (* TODO: placeholder so exhaust etc. *)
     | A.List(t) -> L.pointer_type (ltype_of_typ t)
-    | A.Function (_, _) -> i32_t
+    | A.Function (_, _) |Unknown -> i32_t
   in
   (* Struct Declarations *)
 
@@ -45,7 +45,7 @@ let translate program =
    *)
 
   let node_t : L.lltype = L.named_struct_type context "Node" in
-  L.struct_set_body node_l [| 
+  L.struct_set_body node_t [| 
     L.pointer_type void_t ;
     L.pointer_type node_t 
   |] false;
@@ -57,7 +57,7 @@ let translate program =
    *)
 
   let list_t : L.lltype = L.named_struct_type context "List" in
-  L.struct_set_body list_l [|
+  L.struct_set_body list_t [|
     L.pointer_type node_t ;
     i32_t
   |] false; 
@@ -76,7 +76,7 @@ let translate program =
   let newNode_t : L.lltype = 
     L.function_type (L.pointer_type node_t) [| void_t |] in
   let newNode_f : L.llvalue =
-    L.declare_function "newNode" newEmptyList_t the_module in
+    L.declare_function "newNode" newNode_t the_module in
 
   let appendNode_t : L.lltype =
     L.function_type (L.pointer_type list_t) 
@@ -105,7 +105,7 @@ let translate program =
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
-        let e1' = build_expr e1 and e2' = build_expr e2 in
+        let e1' = build_expr e1 scope and e2' = build_expr e2 scope in
         (* t1 == t2 bc we semanted *)
         ( match op with
         | A.Add -> (
@@ -159,7 +159,7 @@ let translate program =
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
     | SUnaryOp (op, e1) ->
-        let e1' = build_expr e1 in
+        let e1' = build_expr e1 scope in
         ( match op with
         | UMinus -> (
           match e1 with
@@ -168,24 +168,24 @@ let translate program =
         | Not -> L.build_not )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
-        let cond = build_expr condition
-        and e1' = build_expr e1
-        and e2' = build_expr e2 in
+        let cond = build_expr condition scope
+        and e1' = build_expr e1 scope
+        and e2' = build_expr e2 scope in
         L.build_select cond e1' e2' "tmp" builder
     | SAssign (_, _, _)
      |SAssignRec (_, _, _)
-     |SVar _ | SStringLit _ | SCharLit _ | SParenExp _ 
+     |SVar _ | SStringLit _ | SCharLit _ | SParenExp _  -> L.const_int i32_t 0
     | SListExp shrexlst ->
-        let emptylist = L.build_call newEmptyList [| |] "newEmptyList" builder in
+        let emptylist = L.build_call newEmptyList_f [| |] "newEmptyList" builder in
 
         let rec build_list slst llst = 
             (match slst with
               h :: t -> 
                   let e = build_expr h scope in 
-                  let node = L.build_call newNode [| e |] "newNode" builder in
-                  let llst' = L.build_call appendNode [| llst ; node |] 
+                  let node = L.build_call newNode_f [| e |] "newNode" builder in
+                  let llst' = L.build_call appendNode_f [| llst ; node |] 
                       "appendNode" builder in
-                  build_list t lout'
+                  build_list t llst'
             | [] -> llst)
         in
         build_list shrexlst emptylist
@@ -195,5 +195,5 @@ let translate program =
      |SFunApp (_, _) ->
         L.const_int i32_t 0
   in
-  ignore (L.build_ret (build_expr program) builder) ;
+  ignore (L.build_ret (build_expr program StringMap.empty) builder) ;
   the_module
