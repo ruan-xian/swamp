@@ -1,31 +1,33 @@
-native: clean
+default: native lib.a
+	mv swamp.native swamp
+	
+native: 
 	ocamlbuild -pkgs llvm swamp.native
 
-test: clean native 
+test: clean default 
 	sh autotest.sh -s
 
-%.cmo : %.ml
-	ocamlc -w +A-e-l-z -c $<
+lib.a: lib.o 
+	ar -crs liball.a lib.o
 
-%.cmi : %.mli
-	ocamlc -w +A-e-l-z -c $<
+lib.o: lib.c lib.h
 
-scanner.ml : scanner.mll
-	ocamllex $^
+parser.native: parser.mly ast.mli scanner.mll
+	ocamlbuild parser.native
 
-parser.ml parser.mli : parser.mly
-	ocamlyacc -v $^
-
-# Depedencies from ocamldep
-parser.cmo : ast.cmo parser.cmi
-parser.cmx : ast.cmo parser.cmi
-scanner.cmo : parser.cmi
-scanner.cmx : parser.cmx
-
+scanner.native: scanner.mll
+	ocamlbuild scanner.native
 
 ##############################
 
 
 .PHONY : clean
 clean :
-	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml test-* bad-* testall.log *.native *.output
+	ocamlbuild -clean 2>/dev/null
+	rm -rf *.cmi *.cmo 
+	rm -rf parser.ml parser.mli scanner.ml test-* bad-* testall.log 
+	rm -rf *.o *.s *.a *.native *.output
+	rm -rf _build
+
+.PHONY: all
+all: clean default
