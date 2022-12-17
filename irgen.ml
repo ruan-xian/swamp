@@ -90,7 +90,7 @@ let translate program =
           let ftype =
             L.function_type (ltype_of_typ ret_type) lformal_types
           in
-          let f = L.define_function "tmp" ftype the_module in
+          let f = L.define_function "fexp" ftype the_module in
           let body_bb = L.append_block context "body" f in
           ignore
             (L.build_ret (build_expr e) (L.builder_at_end context body_bb)) ;
