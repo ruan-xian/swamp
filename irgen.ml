@@ -74,7 +74,7 @@ let translate program =
     L.declare_function "newEmptyList" newEmptyList_t the_module in
 
   let newNode_t : L.lltype = 
-    L.function_type (L.pointer_type node_t) [| void_t |] in
+    L.function_type (L.pointer_type node_t) [| L.pointer_type void_t |] in
   let newNode_f : L.llvalue =
     L.declare_function "newNode" newNode_t the_module in
 
