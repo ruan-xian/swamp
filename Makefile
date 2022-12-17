@@ -1,16 +1,16 @@
-default: native lib.a
+default: native irgen.a
 	mv swamp.native swamp
 	
-native: 
+native: clean 
 	ocamlbuild -pkgs llvm swamp.native
 
 test: clean default 
 	sh autotest.sh -s
 
-lib.a: lib.o 
-	ar -crs liball.a lib.o
+irgen.a: irgen.o 
+	ar -crs irgen.a irgen.o
 
-lib.o: lib.c lib.h
+irgen.o: irgen.c irgen.h
 
 parser.native: parser.mly ast.mli scanner.mll
 	ocamlbuild parser.native
