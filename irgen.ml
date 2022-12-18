@@ -40,6 +40,7 @@ let translate program =
     L.builder_at_end context
       (L.entry_block (L.define_function "main" ftype the_module))
   in
+
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -47,7 +48,7 @@ let translate program =
      a tuple of (value, new_builder) but i am not going to write this in just
      yet bc i am not 100% positive this is true, something something about
      how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((_, e) : shrexpr) =
+  let rec build_expr ((t, e) : shrexpr) var_table =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -55,7 +56,7 @@ let translate program =
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
-        let e1' = build_expr e1 and e2' = build_expr e2 in
+        let e1' = build_expr e1 var_table and e2' = build_expr e2 var_table in
         (* t1 == t2 bc we semanted *)
         ( match op with
         | A.Add -> (
@@ -109,7 +110,7 @@ let translate program =
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
     | SUnaryOp (op, e1) ->
-        let e1' = build_expr e1 in
+        let e1' = build_expr e1 var_table in
         ( match op with
         | UMinus -> (
           match e1 with
@@ -118,17 +119,21 @@ let translate program =
         | Not -> L.build_not )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
-        let cond = build_expr condition
-        and e1' = build_expr e1
-        and e2' = build_expr e2 in
+        let cond = build_expr condition var_table
+        and e1' = build_expr e1 var_table
+        and e2' = build_expr e2 var_table in
         L.build_select cond e1' e2' "tmp" builder
-    | SAssign (_, _, _)
+    | SAssign (id, rhs, exp) -> let var = L.build_alloca (ltype_of_typ t) id builder in
+      let temp = StringMap.add id var var_table in  
+      let rhs' = build_expr rhs var_table in
+      ignore(L.build_store rhs' var builder); build_expr exp temp
+    | SVar var -> L.build_load (StringMap.find var var_table) var builder
      |SAssignRec (_, _, _)
-     |SVar _ | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
+     | SStringLit _ | SCharLit _ | SParenExp _ | SListExp _
      |SListComp (_, _)
      |SFunExp (_, _)
      |SFunApp (_, _) ->
         L.const_int i32_t 0
   in
-  ignore (L.build_ret (build_expr program) builder) ;
+  ignore (L.build_ret (build_expr program StringMap.empty) builder) ;
   the_module
