@@ -1,3 +1,2 @@
-let f = fun(x:int) -> x * x in
-let g = fun(y:(int -> int), c: int) -> y(c) in
-g(f, 2)
+let x = 1 in
+if x > 0 then 2 else 3

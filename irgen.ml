@@ -36,10 +36,12 @@ let translate program =
     | A.Char -> i8_t
     | A.String -> L.pointer_type i8_t
     (* TODO: placeholder so exhaust etc. *)
-    | A.List _ -> i32_t
-    | A.Function (types, ret) ->
-        let formal_types = Array.of_list (List.map ltype_of_typ types) in
-        L.function_type (ltype_of_typ ret) formal_types
+    | A.List _ ->
+        i32_t
+        (* | A.Function (types, ret) -> *)
+        (* let formal_types = Array.of_list (List.map ltype_of_typ types) in
+           L.function_type (ltype_of_typ ret) formal_types *)
+    | A.Function (_, _) -> i8_t
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
@@ -136,7 +138,8 @@ let translate program =
           | A.Formal (n, f_typ) -> (
             match f_typ with
             | Function (_, _) ->
-                StringMap.add n (f_typ, p) m
+                (* StringMap.add n (f_typ, p) m *)
+                m
                 (* ALT *)
                 (* L.set_value_name n p ; let local = L.build_alloca
                    (ltype_of_typ f_typ) n builder in ignore (L.build_store p
@@ -170,9 +173,12 @@ let translate program =
                  (L.builder_at_end context entry_bb) ) ;
             f )
     | SFunApp (fexp, args) ->
+        let new_var_table = 
+        
+        in
         let f =
           match fexp with
-          | _, SFunExp (_, _) -> build_expr fexp var_table builder
+          | _, SFunExp (_, _) -> build_expr fexp new_var_table builder
           | _, SVar id -> snd (StringMap.find id var_table)
         in
         (* let f = build_expr fexp var_table builder in *)
