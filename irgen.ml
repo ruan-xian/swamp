@@ -52,7 +52,7 @@ let translate program =
       (L.entry_block (L.define_function "main" ftype the_module))
   in
   let func_table = ref IntMap.empty in
-  let handle = ref 0L in
+  let handle = ref 1L in
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -142,12 +142,14 @@ let translate program =
           | A.Formal (n, f_typ) -> (
             match f_typ with
             | Function (_, _) ->
+                L.set_value_name n p ;
                 StringMap.add n (f_typ, p) m
                 (* m *)
                 (* ALT *)
-                (* L.set_value_name n p ; let local = L.build_alloca
-                   (ltype_of_typ f_typ) n builder in ignore (L.build_store p
-                   local builder) ; StringMap.add n (f_typ, local) m *)
+                (* L.set_value_name n p ; *)
+                (* let local = L.build_alloca (ltype_of_typ f_typ) n builder
+                   in ignore (L.build_store p local builder) ; *)
+                (* StringMap.add n (f_typ, local) m *)
             | _ ->
                 L.set_value_name n p ;
                 let local = L.build_alloca (ltype_of_typ f_typ) n builder in
@@ -185,6 +187,7 @@ let translate program =
           | _, SFunExp (_, _) -> build_expr fexp var_table builder
           | _, SVar id -> (
               let _, handle = StringMap.find id var_table in
+              L.dump_value handle ;
               if L.is_constant handle then () else failwith "not a constant" ;
               let handle_int_opt = L.int64_of_const handle in
               match handle_int_opt with
