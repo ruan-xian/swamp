@@ -14,6 +14,10 @@ module A = Ast
 open Sast
 module StringMap = Map.Make (String)
 
+type var_binding = A.typ * L.llvalue
+
+type var_binding_map = var_binding StringMap.t
+
 (* translate : Sast.program -> Llvm.module *)
 let translate program =
   let context = L.global_context () in
@@ -50,7 +54,7 @@ let translate program =
      a tuple of (value, new_builder) but i am not going to write this in just
      yet bc i am not 100% positive this is true, something something about
      how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((t, e) : shrexpr) var_table =
+  let rec build_expr ((t, e) : shrexpr) (var_table : var_binding_map) =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -128,11 +132,14 @@ let translate program =
     | SFunExp (formals, e) -> (
         let add_formals builder m f p =
           match f with
-          | A.Formal (n, t) ->
-              L.set_value_name n p ;
-              let local = L.build_alloca (ltype_of_typ t) n builder in
-              ignore (L.build_store p local builder) ;
-              StringMap.add n local m
+          | A.Formal (n, f_typ) -> (
+            match f_typ with
+            | Function (_, _) -> StringMap.add n (f_typ, p) m
+            | _ ->
+                L.set_value_name n p ;
+                let local = L.build_alloca (ltype_of_typ f_typ) n builder in
+                ignore (L.build_store p local builder) ;
+                StringMap.add n (f_typ, local) m )
         in
         match t with
         | Function (formal_types, ret_type) ->
@@ -156,23 +163,29 @@ let translate program =
                  (L.builder_at_end context body_bb) ) ;
             f )
     | SFunApp (fexp, args) ->
-        let f =
-          match fexp with
-          | _, SFunExp (_, _) -> build_expr fexp var_table
-          | _, SVar id -> StringMap.find id var_table
-        in
-        (* let f = build_expr fexp var_table in *)
+        (* let f = match fexp with | _, SFunExp (_, _) -> build_expr fexp
+           var_table | _, SVar id -> StringMap.find id var_table in *)
+        let f = build_expr fexp var_table in
         let llargs = List.map (fun x -> build_expr x var_table) args in
         L.build_call f (Array.of_list llargs) "result" builder
     | SAssign (id, rhs, exp) ->
-        let var = L.build_alloca (ltype_of_typ t) id builder in
-        let temp = StringMap.add id var var_table in
-        let rhs' = build_expr rhs var_table in
-        ignore (L.build_store rhs' var builder) ;
-        build_expr exp temp
-    | SVar var -> L.build_load (StringMap.find var var_table) var builder
-    | SAssignRec (_, _, _) | SParenExp _ | SListExp _ | SListComp (_, _) ->
-        L.const_int i32_t 0
+        let new_var_table =
+          match rhs with
+          | (Function (_, _) as f), _ ->
+              let rhs' = build_expr rhs var_table in
+              StringMap.add id (f, rhs') var_table
+          | (_ as t), _ ->
+              let var = L.build_alloca (ltype_of_typ t) id builder in
+              let rhs' = build_expr rhs var_table in
+              ignore (L.build_store rhs' var builder) ;
+              StringMap.add id (t, var) var_table
+        in
+        build_expr exp new_var_table
+    | SVar var -> (
+        let v = StringMap.find var var_table in
+        match v with
+        | Function (_, _), llv -> llv
+        | _, llv -> L.build_load llv var builder )
   in
   ignore (L.build_ret (build_expr program StringMap.empty) builder) ;
   the_module
