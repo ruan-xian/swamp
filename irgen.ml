@@ -170,9 +170,12 @@ let translate program =
                  (L.builder_at_end context entry_bb) ) ;
             f )
     | SFunApp (fexp, args) ->
-        (* let f = match fexp with | _, SFunExp (_, _) -> build_expr fexp
-           var_table | _, SVar id -> StringMap.find id var_table in *)
-        let f = build_expr fexp var_table builder in
+        let f =
+          match fexp with
+          | _, SFunExp (_, _) -> build_expr fexp var_table builder
+          | _, SVar id -> snd (StringMap.find id var_table)
+        in
+        (* let f = build_expr fexp var_table builder in *)
         let llargs =
           List.map (fun x -> build_expr x var_table builder) args
         in

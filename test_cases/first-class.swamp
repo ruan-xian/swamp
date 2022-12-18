@@ -1,3 +1,3 @@
 let f = fun(x:int) -> x * x in
-let a = 4 in
-f(a)
+let g = fun(y:(int -> int), c: int) -> y(c) in
+g(f, 2)
