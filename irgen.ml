@@ -134,7 +134,12 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) -> (
             match f_typ with
-            | Function (_, _) -> StringMap.add n (f_typ, p) m
+            | Function (_, _) ->
+                StringMap.add n (f_typ, p) m
+                (* ALT *)
+                (* L.set_value_name n p ; let local = L.build_alloca
+                   (ltype_of_typ f_typ) n builder in ignore (L.build_store p
+                   local builder) ; StringMap.add n (f_typ, local) m *)
             | _ ->
                 L.set_value_name n p ;
                 let local = L.build_alloca (ltype_of_typ f_typ) n builder in
@@ -174,6 +179,10 @@ let translate program =
           | (Function (_, _) as f), _ ->
               let rhs' = build_expr rhs var_table in
               StringMap.add id (f, rhs') var_table
+              (* ALT *)
+              (* let var = L.build_alloca (ltype_of_typ f) id builder in let
+                 rhs' = build_expr rhs var_table in ignore (L.build_store
+                 rhs' var builder) ; StringMap.add id (t, var) var_table *)
           | (_ as t), _ ->
               let var = L.build_alloca (ltype_of_typ t) id builder in
               let rhs' = build_expr rhs var_table in
