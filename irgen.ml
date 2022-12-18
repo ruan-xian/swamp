@@ -176,14 +176,14 @@ let translate program =
         ignore (L.build_store rhs' var builder) ;
         build_expr exp temp
     | SVar var -> L.build_load (StringMap.find var var_table) var builder
-    | SAssignRec (_, _, _) | SListExp shrexlst ->
+    | SListExp shrexlst ->
         let emptylist =
           L.build_call newEmptyList_f [||] "newEmptyList" builder
         in
         let rec build_list slst llst =
           match slst with
           | h :: t ->
-              let e = build_expr h scope in
+              let e = build_expr h var_table in
               let node = L.build_call newNode_f [|e|] "newNode" builder in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
@@ -192,7 +192,8 @@ let translate program =
           | [] -> llst
         in
         build_list shrexlst emptylist
-    | SStringLit _ | SCharLit _ | SParenExp _
+    | SAssignRec (_, _, _)
+     |SParenExp _
      |SListComp (_, _)
      |SFunExp (_, _)
      |SFunApp (_, _) ->
