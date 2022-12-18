@@ -43,7 +43,6 @@ let translate program =
     L.builder_at_end context
       (L.entry_block (L.define_function "main" ftype the_module))
   in
-
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -59,7 +58,8 @@ let translate program =
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
-        let e1' = build_expr e1 var_table and e2' = build_expr e2 var_table in
+        let e1' = build_expr e1 var_table
+        and e2' = build_expr e2 var_table in
         (* t1 == t2 bc we semanted *)
         ( match op with
         | A.Add -> (
@@ -126,31 +126,52 @@ let translate program =
         and e2' = build_expr e2 var_table in
         L.build_select cond e1' e2' "tmp" builder
     | SFunExp (formals, e) -> (
-      match t with
-      | Function (formal_types, ret_type) ->
-          let lformal_types =
-            Array.of_list (List.map (fun t -> ltype_of_typ t) formal_types)
-          in
-          let ftype =
-            L.function_type (ltype_of_typ ret_type) lformal_types
-          in
-          let f = L.define_function "fexp" ftype the_module in
-          let body_bb = L.append_block context "body" f in
-          ignore
-            (L.build_ret (build_expr e var_table) (L.builder_at_end context body_bb)) ;
-          f )
+        let add_formals builder m f p =
+          match f with
+          | A.Formal (n, t) ->
+              L.set_value_name n p ;
+              let local = L.build_alloca (ltype_of_typ t) n builder in
+              ignore (L.build_store p local builder) ;
+              StringMap.add n local m
+        in
+        match t with
+        | Function (formal_types, ret_type) ->
+            let lformal_types =
+              Array.of_list (List.map (fun t -> ltype_of_typ t) formal_types)
+            in
+            let ftype =
+              L.function_type (ltype_of_typ ret_type) lformal_types
+            in
+            let f = L.define_function "fexp" ftype the_module in
+            let body_bb = L.append_block context "body" f in
+            let params_list = Array.to_list (L.params f) in
+            let new_var_table =
+              List.fold_left2
+                (add_formals (L.builder_at_end context body_bb))
+                var_table formals params_list
+            in
+            ignore
+              (L.build_ret
+                 (build_expr e new_var_table)
+                 (L.builder_at_end context body_bb) ) ;
+            f )
     | SFunApp (fexp, args) ->
-        let f = build_expr fexp var_table in
+        let f =
+          match fexp with
+          | _, SFunExp (_, _) -> build_expr fexp var_table
+          | _, SVar id -> StringMap.find id var_table
+        in
+        (* let f = build_expr fexp var_table in *)
         let llargs = List.map (fun x -> build_expr x var_table) args in
         L.build_call f (Array.of_list llargs) "result" builder
-    | SAssign (id, rhs, exp) -> let var = L.build_alloca (ltype_of_typ t) id builder in
-      let temp = StringMap.add id var var_table in  
-      let rhs' = build_expr rhs var_table in
-      ignore(L.build_store rhs' var builder); build_expr exp temp
+    | SAssign (id, rhs, exp) ->
+        let var = L.build_alloca (ltype_of_typ t) id builder in
+        let temp = StringMap.add id var var_table in
+        let rhs' = build_expr rhs var_table in
+        ignore (L.build_store rhs' var builder) ;
+        build_expr exp temp
     | SVar var -> L.build_load (StringMap.find var var_table) var builder
-     |SAssignRec (_, _, _)
-     |SParenExp _ | SListExp _
-     |SListComp (_, _) ->
+    | SAssignRec (_, _, _) | SParenExp _ | SListExp _ | SListComp (_, _) ->
         L.const_int i32_t 0
   in
   ignore (L.build_ret (build_expr program StringMap.empty) builder) ;
