@@ -7,7 +7,7 @@
 
 # Path to the LLVM interpreter
 LLI="lli"
-#LLI="/usr/local/opt/llvm/bin/lli"
+which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli"
 
 # Path to the LLVM compiler
 LLC="llc"
@@ -16,7 +16,7 @@ LLC="llc"
 CC="cc"
 
 # Path to the swamp compiler. 
-SWAMP="./swamp.native"
+SWAMP="./swamp"
 
 # Set time limit for all operations
 ulimit -t 30
@@ -176,7 +176,7 @@ shift `expr $OPTIND - 1`
 
 LLIFail() {
   echo "Could not find the LLVM interpreter \"$LLI\"."
-  echo "Check your LLVM installation and/or modify the LLI variable in testall.sh"
+  echo "Check your LLVM installation and/or modify the LLI variable in autotest.sh"
   exit 1
 }
 
