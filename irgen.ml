@@ -13,6 +13,7 @@ module L = Llvm
 module A = Ast
 open Sast
 module StringMap = Map.Make (String)
+module IntMap = Map.Make (Int64)
 
 type var_binding = A.typ * L.llvalue
 
@@ -27,7 +28,8 @@ let translate program =
   let i32_t = L.i32_type context
   and i8_t = L.i8_type context
   and i1_t = L.i1_type context
-  and float_t = L.float_type context in
+  and float_t = L.float_type context
+  and i64_t = L.i64_type context in
   (* Return the LLVM type for a Swamp type *)
   let rec ltype_of_typ = function
     | A.Int -> i32_t
@@ -41,7 +43,7 @@ let translate program =
         (* | A.Function (types, ret) -> *)
         (* let formal_types = Array.of_list (List.map ltype_of_typ types) in
            L.function_type (ltype_of_typ ret) formal_types *)
-    | A.Function (_, _) -> i8_t
+    | A.Function (_, _) -> i64_t
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
@@ -49,6 +51,8 @@ let translate program =
     L.builder_at_end context
       (L.entry_block (L.define_function "main" ftype the_module))
   in
+  let func_table = ref IntMap.empty in
+  let handle = ref 0L in
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -138,8 +142,8 @@ let translate program =
           | A.Formal (n, f_typ) -> (
             match f_typ with
             | Function (_, _) ->
-                (* StringMap.add n (f_typ, p) m *)
-                m
+                StringMap.add n (f_typ, p) m
+                (* m *)
                 (* ALT *)
                 (* L.set_value_name n p ; let local = L.build_alloca
                    (ltype_of_typ f_typ) n builder in ignore (L.build_store p
@@ -166,20 +170,26 @@ let translate program =
                 (add_formals (L.builder_at_end context entry_bb))
                 var_table formals params_list
             in
+            let curr_handle = !handle in
+            func_table := IntMap.add curr_handle f !func_table ;
+            handle := Int64.succ curr_handle ;
             ignore
               (L.build_ret
                  (build_expr e new_var_table
                     (L.builder_at_end context entry_bb) )
                  (L.builder_at_end context entry_bb) ) ;
-            f )
+            L.const_of_int64 i64_t curr_handle true )
     | SFunApp (fexp, args) ->
-        let new_var_table = 
-        
-        in
         let f =
           match fexp with
-          | _, SFunExp (_, _) -> build_expr fexp new_var_table builder
-          | _, SVar id -> snd (StringMap.find id var_table)
+          | _, SFunExp (_, _) -> build_expr fexp var_table builder
+          | _, SVar id -> (
+              let _, handle = StringMap.find id var_table in
+              if L.is_constant handle then () else failwith "not a constant" ;
+              let handle_int_opt = L.int64_of_const handle in
+              match handle_int_opt with
+              | Some handle_int -> IntMap.find handle_int !func_table
+              | _ -> failwith "handle not in func_table" )
         in
         (* let f = build_expr fexp var_table builder in *)
         let llargs =
@@ -190,16 +200,8 @@ let translate program =
         let new_var_table =
           match rhs with
           | (Function (_, _) as f), _ ->
-              (* let var = L.build_alloca (ltype_of_typ t) id builder in *)
-              (* let llt = L.function_type i1_t (Array.of_list [i1_t; i32_t])
-                 in print_endline ("hewwo " ^ L.string_of_lltype llt) ; *)
-              (* ignore (L.build_alloca llt "yaur" builder) ; *)
               let rhs' = build_expr rhs var_table builder in
               StringMap.add id (f, rhs') var_table
-              (* ALT *)
-              (* let var = L.build_alloca (ltype_of_typ f) id builder in let
-                 rhs' = build_expr rhs var_table in ignore (L.build_store
-                 rhs' var builder) ; StringMap.add id (t, var) var_table *)
           | (_ as t), _ ->
               let var = L.build_alloca (ltype_of_typ t) id builder in
               let rhs' = build_expr rhs var_table builder in

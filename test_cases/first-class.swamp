@@ -1,2 +1,4 @@
-let x = 1 in
-if x > 0 then 2 else 3
+let f = fun(g:(int->int), x:int) -> g(x) in
+let k = 3 in
+let h = fun(c:int) -> c in
+f(h, k)
