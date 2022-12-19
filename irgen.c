@@ -3,7 +3,8 @@
 #include <string.h>
 
 int shreksays(const char *fmt) {
-    printf(fmt);
+    printf("%s", fmt);
+    return 0;
 }
 
 struct List *newEmptyList() {
