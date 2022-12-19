@@ -27,8 +27,7 @@ let translate program =
   let i32_t = L.i32_type context
   and i8_t = L.i8_type context
   and i1_t = L.i1_type context
-  and float_t = L.float_type context
-  and void_t = L.void_type context in
+  and float_t = L.float_type context in
   (* Return the LLVM type for a MicroC type *)
   let rec ltype_of_typ = function
     | A.Int -> i32_t
@@ -51,7 +50,7 @@ let translate program =
    *)
   let node_t : L.lltype = L.named_struct_type context "Node" in
   L.struct_set_body node_t
-    [|L.pointer_type void_t; L.pointer_type node_t|]
+    [|L.pointer_type i8_t; L.pointer_type node_t|]
     false ;
   (* struct List {
    *    struct Node *head;
@@ -74,7 +73,7 @@ let translate program =
     L.declare_function "newEmptyList" newEmptyList_t the_module
   in
   let newNode_t : L.lltype =
-    L.function_type (L.pointer_type node_t) [|L.pointer_type void_t|]
+    L.function_type (L.pointer_type node_t) [|L.pointer_type i8_t|]
   in
   let newNode_f : L.llvalue =
     L.declare_function "newNode" newNode_t the_module
