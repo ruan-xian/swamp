@@ -102,7 +102,7 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.const_stringz context s
+    | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
