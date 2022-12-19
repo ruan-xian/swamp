@@ -40,10 +40,10 @@ let translate program =
     (* TODO: placeholder so exhaust etc. *)
     | A.List _ ->
         i32_t
-        (* | A.Function (types, ret) -> *)
-        (* let formal_types = Array.of_list (List.map ltype_of_typ types) in
-           L.function_type (ltype_of_typ ret) formal_types *)
-    | A.Function (_, _) -> i64_t
+        | A.Function (types, ret) ->
+        let formal_types = Array.of_list (List.map ltype_of_typ types) in
+           L.pointer_type (L.function_type (ltype_of_typ ret) formal_types)
+    (* | A.Function (_, _) -> i64_t *)
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
@@ -141,18 +141,9 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) -> (
             match f_typ with
-            | Function (_, _) ->
-                L.set_value_name n p ;
-                StringMap.add n (f_typ, p) m
-                (* m *)
-                (* ALT *)
-                (* L.set_value_name n p ; *)
-                (* let local = L.build_alloca (ltype_of_typ f_typ) n builder
-                   in ignore (L.build_store p local builder) ; *)
-                (* StringMap.add n (f_typ, local) m *)
             | _ ->
                 L.set_value_name n p ;
-                let local = L.build_alloca (ltype_of_typ f_typ) n builder in
+                let local = L.build_alloca (L.type_of p) n builder in
                 ignore (L.build_store p local builder) ;
                 StringMap.add n (f_typ, local) m )
         in
@@ -165,7 +156,8 @@ let translate program =
               L.function_type (ltype_of_typ ret_type) lformal_types
             in
             let f = L.define_function "fexp" ftype the_module in
-            let params_list = Array.to_list (L.params f) in
+            (* let params_list = List.map (fun x -> L.dump_value x; x) (Array.to_list (L.params f)) in *)
+            let params_list = (Array.to_list (L.params f)) in
             let entry_bb = L.entry_block f in
             let new_var_table =
               List.fold_left2
@@ -180,19 +172,11 @@ let translate program =
                  (build_expr e new_var_table
                     (L.builder_at_end context entry_bb) )
                  (L.builder_at_end context entry_bb) ) ;
-            L.const_of_int64 i64_t curr_handle true )
+            f )
     | SFunApp (fexp, args) ->
         let f =
           match fexp with
-          | _, SFunExp (_, _) -> build_expr fexp var_table builder
-          | _, SVar id -> (
-              let _, handle = StringMap.find id var_table in
-              L.dump_value handle ;
-              if L.is_constant handle then () else failwith "not a constant" ;
-              let handle_int_opt = L.int64_of_const handle in
-              match handle_int_opt with
-              | Some handle_int -> IntMap.find handle_int !func_table
-              | _ -> failwith "handle not in func_table" )
+          | _ -> build_expr fexp var_table builder
         in
         (* let f = build_expr fexp var_table builder in *)
         let llargs =
@@ -202,12 +186,11 @@ let translate program =
     | SAssign (id, rhs, exp) ->
         let new_var_table =
           match rhs with
-          | (Function (_, _) as f), _ ->
-              let rhs' = build_expr rhs var_table builder in
-              StringMap.add id (f, rhs') var_table
           | (_ as t), _ ->
-              let var = L.build_alloca (ltype_of_typ t) id builder in
               let rhs' = build_expr rhs var_table builder in
+              (* L.dump_value rhs'; *)
+              (* print_string (L.string_of_lltype (L.type_of rhs')); *)
+              let var = L.build_alloca (L.type_of rhs') id builder in
               ignore (L.build_store rhs' var builder) ;
               StringMap.add id (t, var) var_table
         in
@@ -215,7 +198,6 @@ let translate program =
     | SVar var -> (
         let v = StringMap.find var var_table in
         match v with
-        | Function (_, _), llv -> llv
         | _, llv -> L.build_load llv var builder )
   in
   ignore
