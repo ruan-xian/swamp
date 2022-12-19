@@ -1,1 +1,1 @@
-(int : (int : (int : 3) * (int : 5)) - (int : (int : 2) + (int : 1)))
+(float : (float : (float : 3.5) * (float : 5.)) - (float : (float : 2.) + (float : 1.)))

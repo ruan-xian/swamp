@@ -87,28 +87,25 @@ let translate program =
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
-  let builder_init =
-    L.builder_at_end context
-      (L.entry_block (L.define_function "main" ftype the_module))
+  let f_init = L.define_function "main" ftype the_module in
+  let builder_init = L.builder_at_end context (L.entry_block f_init) in
+  let add_terminal builder instr =
+    match L.block_terminator (L.insertion_block builder) with
+    | Some _ -> ()
+    | None -> ignore (instr builder)
   in
   (* Construct code for an expression; return the value of the expression *)
-  (* for this basic framework we dont need to pass around a builder, but i
-     think for conditionals we will need to -- so build_expr needs to also
-     take in a builder, and then instead of just returning the value, return
-     a tuple of (value, new_builder) but i am not going to write this in just
-     yet bc i am not 100% positive this is true, something something about
-     how the builder updates itself?? -- alice this is your problem :P *)
-  let rec build_expr ((t, e) : shrexpr) (var_table : var_binding_map) builder
-      =
+  let rec build_expr ((t, e) : shrexpr) (var_table : var_binding_map)
+      the_function builder =
     match e with
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.build_global_stringptr s "tmp" builder
+    | SStringLit s -> L.const_stringz context s
     | SInfixOp (e1, op, e2) ->
-        let e1' = build_expr e1 var_table builder
-        and e2' = build_expr e2 var_table builder in
+        let e1' = build_expr e1 var_table the_function builder
+        and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
         ( match op with
         | A.Add -> (
@@ -138,13 +135,13 @@ let translate program =
           | _ -> failwith "unreachable" )
         | Eq -> (
           match e1 with
-          | A.Int, _ | A.Bool, _-> L.build_icmp L.Icmp.Eq
+          | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Eq
           | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq
           (* quick someone do the other types or smth idk *)
           | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
-          | A.Int, _ | A.Bool, _-> L.build_icmp L.Icmp.Ne
+          | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Ne
           | A.Float, _ -> L.build_fcmp L.Fcmp.Une
           | _ -> failwith "unreachable" )
         | Less -> (
@@ -170,10 +167,10 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
+        | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     | SUnaryOp (op, e1) ->
-        let e1' = build_expr e1 var_table builder in
+        let e1' = build_expr e1 var_table the_function builder in
         ( match op with
         | UMinus -> (
           match e1 with
@@ -184,10 +181,21 @@ let translate program =
         | _ -> failwith "unreachable" )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
-        let cond = build_expr condition var_table builder
-        and e1' = build_expr e1 var_table builder
-        and e2' = build_expr e2 var_table builder in
-        L.build_select cond e1' e2' "tmp" builder
+        let bool_val = build_expr condition var_table the_function builder in
+        let then_bb = L.append_block context "then" the_function in
+        let e1' =
+          build_expr e1 var_table the_function
+            (L.builder_at_end context then_bb)
+        in
+        L.build_ret e1' (L.builder_at_end context then_bb) ;
+        let else_bb = L.append_block context "else" the_function in
+        let e2' =
+          build_expr e2 var_table the_function
+            (L.builder_at_end context else_bb)
+        in
+        L.build_ret e2' (L.builder_at_end context else_bb) ;
+        L.build_cond_br bool_val then_bb else_bb builder ;
+        L.const_int i32_t 0
     | SListExp shrexlst ->
         let emptylist =
           L.build_call newEmptyList_f [||] "newEmptyList" builder
@@ -195,7 +203,7 @@ let translate program =
         let rec build_list slst llst =
           match slst with
           | h :: t ->
-              let e = build_expr h var_table builder in
+              let e = build_expr h var_table the_function builder in
               let node = L.build_call newNode_f [|e|] "newNode" builder in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
@@ -209,9 +217,14 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) ->
               L.set_value_name n p ;
-              let local = L.build_alloca (L.type_of p) n builder in
-              ignore (L.build_store p local builder) ;
-              StringMap.add n (f_typ, local) m
+              let var =
+                L.define_global n (L.const_null (L.type_of p)) the_module
+              in
+              ignore (L.build_store p var builder) ;
+              StringMap.add n (t, var) m
+          (* let local = L.build_alloca (L.type_of p) n builder in ignore
+             (L.build_store p local builder) ; StringMap.add n (f_typ, local)
+             m *)
         in
         match t with
         | Function (formal_types, ret_type) ->
@@ -231,38 +244,47 @@ let translate program =
                 (add_formals (L.builder_at_end context entry_bb))
                 var_table formals params_list
             in
-            ignore
-              (L.build_ret
-                 (build_expr e new_var_table
-                    (L.builder_at_end context entry_bb) )
-                 (L.builder_at_end context entry_bb) ) ;
+            let ret =
+              build_expr e new_var_table f
+                (L.builder_at_end context entry_bb)
+            in
+            ( match L.block_end f with
+            | After bb ->
+                add_terminal (L.builder_at_end context bb) (L.build_ret ret)
+            ) ;
             f
         | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
-        let f = build_expr fexp var_table builder in
+        let f = build_expr fexp var_table the_function builder in
         let llargs =
-          List.map (fun x -> build_expr x var_table builder) args
+          List.map
+            (fun x -> build_expr x var_table the_function builder)
+            args
         in
         L.build_call f (Array.of_list llargs) "result" builder
     | SAssign (id, rhs, exp) ->
         let new_var_table =
           let t = fst rhs in
-          let rhs' = build_expr rhs var_table builder in
-          let var = L.define_global id (L.const_null(L.type_of rhs')) the_module in
-          ignore(L.build_store rhs' var builder);
+          let rhs' = build_expr rhs var_table the_function builder in
+          let var =
+            L.define_global id (L.const_null (L.type_of rhs')) the_module
+          in
+          ignore (L.build_store rhs' var builder) ;
           StringMap.add id (t, var) var_table
         in
-        build_expr exp new_var_table builder
+        build_expr exp new_var_table the_function builder
     | SAssignRec (id, rhs, exp) ->
-      let new_var_table =
-        let t = fst rhs in
-        let var = L.define_global id (L.const_null(ltype_of_typ t)) the_module in
-        let temp = StringMap.add id (t, var) var_table in
-        let rhs' = build_expr rhs temp builder in
-        ignore(L.build_store rhs' var builder);
-        temp
-      in
-      build_expr exp new_var_table builder
+        let new_var_table =
+          let t = fst rhs in
+          let var =
+            L.define_global id (L.const_null (ltype_of_typ t)) the_module
+          in
+          let temp = StringMap.add id (t, var) var_table in
+          let rhs' = build_expr rhs temp the_function builder in
+          ignore (L.build_store rhs' var builder) ;
+          temp
+        in
+        build_expr exp new_var_table the_function builder
     | SVar var -> (
         let v = StringMap.find_opt var var_table in
         (match v with 
@@ -275,7 +297,10 @@ let translate program =
   in
   ignore
     (L.build_ret
-       (build_expr program StringMap.empty builder_init)
+       (build_expr program StringMap.empty f_init builder_init)
        builder_init ) ;
-  ignore (L.build_ret (L.const_int i32_t 0) builder_init) ;
+  build_expr program StringMap.empty f_init builder_init ;
+  ( match L.block_end f_init with
+  | After bb ->
+      L.build_ret (L.const_int i32_t 0) (L.builder_at_end context bb) ) ;
   the_module

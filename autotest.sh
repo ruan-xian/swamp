@@ -92,12 +92,11 @@ Check() {
 
     generatedfiles=""
 
-	if [ $sast -eq 0] ; then
-    generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
-    Run "$SWAMP" "$1" ">" "${basename}.ll" &&
-    Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
-    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "$PRINTBIG" &&
-    Run "./${basename}.exe" > "${basename}.out" &&
+	if [ "$sast" -eq 0 ]
+    then
+    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
+    Run "$SWAMP" "-l $1" ">" "${basename}.ll" &&
+    Run "$LLI" "${basename}.ll; echo \$?" ">" "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 	else
     generatedfiles="$generatedfiles ${basename}.sast" &&
@@ -166,11 +165,6 @@ while getopts kdpsh c; do
 	    ;;
     esac
 done
-
-if [ $sast -eq 0 ] ; then
-	echo "Only SAST checking (-s) is supported right now. Check back later"
-	exit 1
-fi
 
 shift `expr $OPTIND - 1`
 
