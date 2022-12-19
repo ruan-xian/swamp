@@ -31,7 +31,7 @@ let translate program =
     | A.Bool -> i1_t
     | A.Float -> float_t
     | A.Char -> i8_t
-    | A.String -> L.pointer_type i8_t
+    | A.String -> i8_t
     (* TODO: placeholder so exhaust etc. *)
     | A.List t -> L.pointer_type (ltype_of_typ t)
     | A.Function (_, _) | Unknown -> i32_t
@@ -99,7 +99,7 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.build_global_stringptr s "tmp" builder
+    | SStringLit s -> L.const_stringz context s
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 var_table
         and e2' = build_expr e2 var_table in
@@ -192,8 +192,8 @@ let translate program =
           | [] -> llst
         in
         build_list shrexlst emptylist
-    | SAssignRec (_, _, _)
-     |SParenExp _
+     | SAssignRec (_, _, _)
+     | SParenExp _
      |SListComp (_, _)
      |SFunExp (_, _)
      |SFunApp (_, _) ->
