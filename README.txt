@@ -106,6 +106,9 @@ conditional.swamp
 			Assignment
 			Return type inference for recursive functions
 			Conditional expressions
+		IR for
+			Working with Ellen on first class functions
+			Recursive functions
 	Alice Wang (aw3271): 
 		SAST + semant + irgen support for String and Char literals 
 		String and Char concatentation (semant.ml)
