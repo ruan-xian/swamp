@@ -113,8 +113,8 @@ let translate program =
         ( match op with
         | A.Add -> (
           match e1 with
-          | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub
+          | A.Int, _ -> L.build_add
+          | A.Float, _ -> L.build_fadd
           | _ -> failwith "unreachable" )
         | A.Sub -> (
           match e1 with
@@ -253,6 +253,16 @@ let translate program =
           StringMap.add id (t, var) var_table
         in
         build_expr exp new_var_table builder
+    | SAssignRec (id, rhs, exp) ->
+      let new_var_table =
+        let t = fst rhs in
+        let var = L.define_global id (L.const_null(ltype_of_typ t)) the_module in
+        let temp = StringMap.add id (t, var) var_table in
+        let rhs' = build_expr rhs temp builder in
+        ignore(L.build_store rhs' var builder);
+        temp
+      in
+      build_expr exp new_var_table builder
     | SVar var -> (
         let v = StringMap.find var var_table in
         match v with _, llv -> L.build_load llv var builder )
