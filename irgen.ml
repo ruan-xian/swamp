@@ -138,13 +138,13 @@ let translate program =
           | _ -> failwith "unreachable" )
         | Eq -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Eq
+          | A.Int, _ | A.Bool, _-> L.build_icmp L.Icmp.Eq
           | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq
           (* quick someone do the other types or smth idk *)
           | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Ne
+          | A.Int, _ | A.Bool, _-> L.build_icmp L.Icmp.Ne
           | A.Float, _ -> L.build_fcmp L.Fcmp.Une
           | _ -> failwith "unreachable" )
         | Less -> (
