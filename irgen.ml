@@ -107,8 +107,8 @@ let translate program =
         ( match op with
         | A.Add -> (
           match e1 with
-          | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub )
+          | A.Int, _ -> L.build_add 
+          | A.Float, _ -> L.build_fadd )
         | A.Sub -> (
           match e1 with
           | A.Int, _ -> L.build_sub
@@ -152,7 +152,7 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
+        | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     (* TODO: placeholders *)
     | SUnaryOp (op, e1) ->
