@@ -1,0 +1,3 @@
+let h = fun(x:int) -> (fun() -> x)
+in
+(h(2))()

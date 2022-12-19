@@ -102,7 +102,7 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.build_global_stringptr s "tmp" builder
+    | SStringLit s -> L.const_stringz context s
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
@@ -167,7 +167,7 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
+        | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
@@ -217,9 +217,12 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) ->
               L.set_value_name n p ;
-              let local = L.build_alloca (L.type_of p) n builder in
+              let var = L.define_global n (L.const_null(L.type_of p)) the_module in
+              ignore(L.build_store p var builder);
+              StringMap.add n (t, var) m
+              (* let local = L.build_alloca (L.type_of p) n builder in
               ignore (L.build_store p local builder) ;
-              StringMap.add n (f_typ, local) m
+              StringMap.add n (f_typ, local) m *)
         in
         match t with
         | Function (formal_types, ret_type) ->

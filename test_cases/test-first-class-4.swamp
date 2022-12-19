@@ -1,0 +1,10 @@
+let h = fun(
+	f:(( -> int), int -> int),
+	g:( -> int),
+	x:int
+) -> (f)((g), x) in
+
+let g2 = fun() -> 2 in
+let f2 = fun(z:( -> int), b:int) ->
+b + (z)() in
+h(f2, g2, 3)
