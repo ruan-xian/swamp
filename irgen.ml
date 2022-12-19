@@ -209,9 +209,12 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) ->
               L.set_value_name n p ;
-              let local = L.build_alloca (L.type_of p) n builder in
+              let var = L.define_global n (L.const_null(L.type_of p)) the_module in
+              ignore(L.build_store p var builder);
+              StringMap.add n (t, var) m
+              (* let local = L.build_alloca (L.type_of p) n builder in
               ignore (L.build_store p local builder) ;
-              StringMap.add n (f_typ, local) m
+              StringMap.add n (f_typ, local) m *)
         in
         match t with
         | Function (formal_types, ret_type) ->
