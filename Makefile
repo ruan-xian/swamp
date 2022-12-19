@@ -5,7 +5,7 @@ native: clean
 	ocamlbuild -pkgs llvm swamp.native
 
 test: clean default 
-	sh autotest.sh -s
+	sh autotest.sh
 
 irgen.a: irgen.o 
 	ar -crs irgen.a irgen.o

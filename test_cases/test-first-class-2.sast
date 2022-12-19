@@ -1,0 +1,1 @@
+(int : let f = (((int -> int), int -> int) : fun(g:(int -> int), c:int) -> (int : ((int -> int) : g)((int : c)))) in (int : let h = ((int -> int) : fun(a:int) -> (int : (int : a) + (int : 2))) in (int : (((int -> int), int -> int) : f)(((int -> int) : h), (int : 4)))))
