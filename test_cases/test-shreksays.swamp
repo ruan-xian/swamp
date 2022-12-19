@@ -1,0 +1,4 @@
+0=| Expected value: printf("hello swamp") |=0
+let str = "hello swamp\n" in
+shreksays(str)
+

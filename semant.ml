@@ -277,4 +277,6 @@ let check program =
                  ( "Invalid list comprehension expression: "
                  ^ string_of_qual ci ) ) )
   in
-  match program with Expr e -> check_expr StringMap.empty e
+  let ssays_t = Function([String], Int) in
+  let ttable = StringMap.add "shreksays" ssays_t StringMap.empty in
+  match program with Expr e -> check_expr ttable e
