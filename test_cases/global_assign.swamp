@@ -1,0 +1,4 @@
+let f = fun(x:int) -> 
+	let y = x 
+	in y + x 
+in f(3)

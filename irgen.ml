@@ -248,7 +248,8 @@ let translate program =
         let new_var_table =
           let t = fst rhs in
           let rhs' = build_expr rhs var_table builder in
-          let var = L.define_global id rhs' the_module in
+          let var = L.define_global id (L.const_null(L.type_of rhs')) the_module in
+          ignore(L.build_store rhs' var builder);
           StringMap.add id (t, var) var_table
         in
         build_expr exp new_var_table builder
