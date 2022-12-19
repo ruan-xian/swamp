@@ -264,8 +264,13 @@ let translate program =
       in
       build_expr exp new_var_table builder
     | SVar var -> (
-        let v = StringMap.find var var_table in
-        match v with _, llv -> L.build_load llv var builder )
+        let v = StringMap.find_opt var var_table in
+        (match v with 
+          Some (_, llv) -> L.build_load llv var builder 
+        | None -> (
+            match L.lookup_function var the_module with
+              Some f -> f
+            | None -> raise (Failure (var^ "not found in var_table")))))
     | _ -> failwith "unimplemented"
   in
   ignore
