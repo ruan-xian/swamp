@@ -105,7 +105,7 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.build_global_stringptr s "tmp" builder
+    | SStringLit s -> L.const_stringz context s
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 var_table builder
         and e2' = build_expr e2 var_table builder in
@@ -170,7 +170,7 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | Not | UMinus | Cat | Cons | Head | Tail -> L.build_add )
+        | UMinus | Cat | Cons | Head | Tail -> L.build_add )
           e1' e2' "tmp" builder
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table builder in
