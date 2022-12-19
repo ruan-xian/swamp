@@ -36,10 +36,9 @@ let translate program =
     | A.Char -> i8_t
     | A.String -> L.pointer_type i8_t
     (* TODO: placeholder so exhaust etc. *)
-    | A.List _ ->
-        i32_t
+    | A.List _ -> i32_t
     | A.Function (types, ret) ->
-      let formal_types = Array.of_list (List.map ltype_of_typ types) in
+        let formal_types = Array.of_list (List.map ltype_of_typ types) in
         L.pointer_type (L.function_type (ltype_of_typ ret) formal_types)
     | A.Unknown -> failwith "how the fuck did you get here"
   in
@@ -72,58 +71,58 @@ let translate program =
         | A.Add -> (
           match e1 with
           | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub 
+          | A.Float, _ -> L.build_fsub
           | _ -> failwith "unreachable" )
         | A.Sub -> (
           match e1 with
           | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub 
+          | A.Float, _ -> L.build_fsub
           | _ -> failwith "unreachable" )
         | A.Mul -> (
           match e1 with
           | A.Int, _ -> L.build_mul
-          | A.Float, _ -> L.build_fmul 
+          | A.Float, _ -> L.build_fmul
           | _ -> failwith "unreachable" )
         | A.Div -> (
           match e1 with
           | A.Int, _ -> L.build_sdiv
-          | A.Float, _ -> L.build_fdiv 
+          | A.Float, _ -> L.build_fdiv
           | _ -> failwith "unreachable" )
         | A.Mod -> (
           match e1 with
           | A.Int, _ -> L.build_srem
-          | A.Float, _ -> L.build_frem 
+          | A.Float, _ -> L.build_frem
           | _ -> failwith "unreachable" )
         | Eq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Eq
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq
           (* quick someone do the other types or smth idk *)
           | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Ne
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Une 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Une
           | _ -> failwith "unreachable" )
         | Less -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Slt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult
           | _ -> failwith "unreachable" )
         | Greater -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sgt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt
           | _ -> failwith "unreachable" )
         | Geq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sge
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge
           | _ -> failwith "unreachable" )
         | Leq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sle
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule 
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule
           | _ -> failwith "unreachable" )
         | And -> L.build_and
         | Or -> L.build_or
@@ -136,9 +135,9 @@ let translate program =
         | UMinus -> (
           match e1 with
           | A.Int, _ -> L.build_neg
-          | A.Float, _ -> L.build_fneg 
+          | A.Float, _ -> L.build_fneg
           | _ -> failwith "unreachable" )
-        | Not -> L.build_not 
+        | Not -> L.build_not
         | _ -> failwith "unreachable" )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
@@ -149,11 +148,11 @@ let translate program =
     | SFunExp (formals, e) -> (
         let add_formals builder m f p =
           match f with
-          | A.Formal (n, f_typ) -> (
-            L.set_value_name n p ;
-            let local = L.build_alloca (L.type_of p) n builder in
-            ignore (L.build_store p local builder) ;
-            StringMap.add n (f_typ, local) m )
+          | A.Formal (n, f_typ) ->
+              L.set_value_name n p ;
+              let local = L.build_alloca (L.type_of p) n builder in
+              ignore (L.build_store p local builder) ;
+              StringMap.add n (f_typ, local) m
         in
         match t with
         | Function (formal_types, ret_type) ->
@@ -164,8 +163,9 @@ let translate program =
               L.function_type (ltype_of_typ ret_type) lformal_types
             in
             let f = L.define_function "fexp" ftype the_module in
-            (* let params_list = List.map (fun x -> L.dump_value x; x) (Array.to_list (L.params f)) in *)
-            let params_list = (Array.to_list (L.params f)) in
+            (* let params_list = List.map (fun x -> L.dump_value x; x)
+               (Array.to_list (L.params f)) in *)
+            let params_list = Array.to_list (L.params f) in
             let entry_bb = L.entry_block f in
             let new_var_table =
               List.fold_left2
@@ -177,7 +177,7 @@ let translate program =
                  (build_expr e new_var_table
                     (L.builder_at_end context entry_bb) )
                  (L.builder_at_end context entry_bb) ) ;
-            f 
+            f
         | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
         let f = build_expr fexp var_table builder in
@@ -189,17 +189,13 @@ let translate program =
         let new_var_table =
           let t = fst rhs in
           let rhs' = build_expr rhs var_table builder in
-          (* L.dump_value rhs'; *)
-          (* print_string (L.string_of_lltype (L.type_of rhs')); *)
-          let var = L.build_alloca (L.type_of rhs') id builder in
-          ignore (L.build_store rhs' var builder) ;
+          let var = L.define_global id rhs' the_module in
           StringMap.add id (t, var) var_table
         in
         build_expr exp new_var_table builder
     | SVar var -> (
         let v = StringMap.find var var_table in
-        match v with
-        | _, llv -> L.build_load llv var builder )
+        match v with _, llv -> L.build_load llv var builder )
     | _ -> failwith "unimplemented"
   in
   ignore
