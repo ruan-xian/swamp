@@ -180,9 +180,10 @@ let check program =
         in
         let t, e = check_expr new_map rhs in
         let types =
-          List.fold_left
-            (fun l f -> match f with Formal (_, ty) -> ty :: l)
-            [] formals
+          List.rev
+            (List.fold_left
+               (fun l f -> match f with Formal (_, ty) -> ty :: l)
+               [] formals )
         in
         if t = Unknown then (Unknown, SUnknown)
         else (Function (types, t), SFunExp (formals, (t, e)))

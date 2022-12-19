@@ -1,0 +1,1 @@
+let f = fun(x:int) -> x in let g = 20 in f(3)

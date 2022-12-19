@@ -16,7 +16,6 @@ and sx =
   | SFloatLit of float
   | SStringLit of string
   | SCharLit of char
-  | SParenExp of shrexpr
   | SListExp of shrexpr list
   | SListComp of shrexpr * squal list
   | SFunExp of formal list * shrexpr
@@ -42,7 +41,6 @@ let rec string_of_shrexpr (t, e) =
     | SCondExp (e1, e2, e3)-> "if " ^ string_of_shrexpr e1 ^ " then " ^ string_of_shrexpr e2 ^ " else " ^ string_of_shrexpr e3
     | SInfixOp(i1, op, i2) -> string_of_shrexpr i1 ^ " " ^ string_of_op op ^ " " ^ string_of_shrexpr i2
     | SUnaryOp(op, i1) ->string_of_op op ^ " " ^ string_of_shrexpr i1
-    | SParenExp(e) ->  "(" ^ string_of_shrexpr e ^ ")"
     | SListExp(el) -> "[" ^ String.concat ";" (List.map string_of_shrexpr el) ^ "]" 
     | SListComp(e1, ql) -> "[" ^ string_of_shrexpr e1 ^ " " ^ String.concat " " (List.map string_of_squal ql) ^ "]"
     | SFunExp(fs, e) -> "fun(" ^ string_of_list string_of_formal fs ^ ") -> " ^ string_of_shrexpr e
