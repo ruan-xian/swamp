@@ -217,12 +217,14 @@ let translate program =
           match f with
           | A.Formal (n, f_typ) ->
               L.set_value_name n p ;
-              let var = L.define_global n (L.const_null(L.type_of p)) the_module in
-              ignore(L.build_store p var builder);
+              let var =
+                L.define_global n (L.const_null (L.type_of p)) the_module
+              in
+              ignore (L.build_store p var builder) ;
               StringMap.add n (t, var) m
-              (* let local = L.build_alloca (L.type_of p) n builder in
-              ignore (L.build_store p local builder) ;
-              StringMap.add n (f_typ, local) m *)
+          (* let local = L.build_alloca (L.type_of p) n builder in ignore
+             (L.build_store p local builder) ; StringMap.add n (f_typ, local)
+             m *)
         in
         match t with
         | Function (formal_types, ret_type) ->
@@ -288,8 +290,10 @@ let translate program =
         match v with _, llv -> L.build_load llv var builder )
     | _ -> failwith "unimplemented"
   in
-  (* ignore (L.build_ret (build_expr program StringMap.empty f_init
-     builder_init) builder_init ) ; *)
+  ignore
+    (L.build_ret
+       (build_expr program StringMap.empty f_init builder_init)
+       builder_init ) ;
   build_expr program StringMap.empty f_init builder_init ;
   ( match L.block_end f_init with
   | After bb ->
