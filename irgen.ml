@@ -181,21 +181,31 @@ let translate program =
         | _ -> failwith "unreachable" )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
+        let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
         let bool_val = build_expr condition var_table the_function builder in
         let then_bb = L.append_block context "then" the_function in
         let e1' =
           build_expr e1 var_table the_function
             (L.builder_at_end context then_bb)
         in
-        L.build_ret e1' (L.builder_at_end context then_bb) ;
+        ignore (L.build_store e1' res (L.builder_at_end context then_bb)) ;
+        (* L.build_ret e1' (L.builder_at_end context then_bb) ; *)
         let else_bb = L.append_block context "else" the_function in
         let e2' =
           build_expr e2 var_table the_function
             (L.builder_at_end context else_bb)
         in
-        L.build_ret e2' (L.builder_at_end context else_bb) ;
+        ignore (L.build_store e2' res (L.builder_at_end context else_bb)) ;
+        let end_bb = L.append_block context "if_end" the_function in
+        let build_br_end = L.build_br end_bb in
+        (* partial function *)
+        add_terminal (L.builder_at_end context then_bb) build_br_end ;
+        add_terminal (L.builder_at_end context else_bb) build_br_end ;
+        (* L.build_ret e2' (L.builder_at_end context else_bb) ; *)
         L.build_cond_br bool_val then_bb else_bb builder ;
-        L.const_int i32_t 0
+        (* L.build_select bool_val e1' e2' "cond-res" (L.builder_at_end
+           context end_bb) *)
+        L.build_load res "cond-ret" (L.builder_at_end context end_bb)
     | SListExp shrexlst ->
         let emptylist =
           L.build_call newEmptyList_f [||] "newEmptyList" builder
@@ -287,12 +297,12 @@ let translate program =
         build_expr exp new_var_table the_function builder
     | SVar var -> (
         let v = StringMap.find_opt var var_table in
-        (match v with 
-          Some (_, llv) -> L.build_load llv var builder 
+        match v with
+        | Some (_, llv) -> L.build_load llv var builder
         | None -> (
-            match L.lookup_function var the_module with
-              Some f -> f
-            | None -> raise (Failure (var^ "not found in var_table")))))
+          match L.lookup_function var the_module with
+          | Some f -> f
+          | None -> raise (Failure (var ^ "not found in var_table")) ) )
     | _ -> failwith "unimplemented"
   in
   ignore
