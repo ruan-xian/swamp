@@ -1,0 +1,4 @@
+let f = fun(x:int) -> (fun() -> x) in
+let a = (f(1))() in
+let b = (f(1))() in
+a + b

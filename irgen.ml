@@ -13,7 +13,6 @@ module L = Llvm
 module A = Ast
 open Sast
 module StringMap = Map.Make (String)
-module IntMap = Map.Make (Int64)
 
 type var_binding = A.typ * L.llvalue
 
@@ -28,8 +27,7 @@ let translate program =
   let i32_t = L.i32_type context
   and i8_t = L.i8_type context
   and i1_t = L.i1_type context
-  and float_t = L.float_type context
-  and i64_t = L.i64_type context in
+  and float_t = L.float_type context in
   (* Return the LLVM type for a Swamp type *)
   let rec ltype_of_typ = function
     | A.Int -> i32_t
@@ -40,10 +38,10 @@ let translate program =
     (* TODO: placeholder so exhaust etc. *)
     | A.List _ ->
         i32_t
-        | A.Function (types, ret) ->
-        let formal_types = Array.of_list (List.map ltype_of_typ types) in
-           L.pointer_type (L.function_type (ltype_of_typ ret) formal_types)
-    (* | A.Function (_, _) -> i64_t *)
+    | A.Function (types, ret) ->
+      let formal_types = Array.of_list (List.map ltype_of_typ types) in
+        L.pointer_type (L.function_type (ltype_of_typ ret) formal_types)
+    | A.Unknown -> failwith "how the fuck did you get here"
   in
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
@@ -51,8 +49,6 @@ let translate program =
     L.builder_at_end context
       (L.entry_block (L.define_function "main" ftype the_module))
   in
-  let func_table = ref IntMap.empty in
-  let handle = ref 1L in
   (* Construct code for an expression; return the value of the expression *)
   (* for this basic framework we dont need to pass around a builder, but i
      think for conditionals we will need to -- so build_expr needs to also
@@ -76,47 +72,59 @@ let translate program =
         | A.Add -> (
           match e1 with
           | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub )
+          | A.Float, _ -> L.build_fsub 
+          | _ -> failwith "unreachable" )
         | A.Sub -> (
           match e1 with
           | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub )
+          | A.Float, _ -> L.build_fsub 
+          | _ -> failwith "unreachable" )
         | A.Mul -> (
           match e1 with
           | A.Int, _ -> L.build_mul
-          | A.Float, _ -> L.build_fmul )
+          | A.Float, _ -> L.build_fmul 
+          | _ -> failwith "unreachable" )
         | A.Div -> (
           match e1 with
           | A.Int, _ -> L.build_sdiv
-          | A.Float, _ -> L.build_fdiv )
+          | A.Float, _ -> L.build_fdiv 
+          | _ -> failwith "unreachable" )
         | A.Mod -> (
           match e1 with
           | A.Int, _ -> L.build_srem
-          | A.Float, _ -> L.build_frem )
+          | A.Float, _ -> L.build_frem 
+          | _ -> failwith "unreachable" )
         | Eq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Eq
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq 
+          (* quick someone do the other types or smth idk *)
+          | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Ne
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Une )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Une 
+          | _ -> failwith "unreachable" )
         | Less -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Slt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult 
+          | _ -> failwith "unreachable" )
         | Greater -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sgt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt 
+          | _ -> failwith "unreachable" )
         | Geq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sge
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge 
+          | _ -> failwith "unreachable" )
         | Leq -> (
           match e1 with
           | A.Int, _ -> L.build_icmp L.Icmp.Sle
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule )
+          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule 
+          | _ -> failwith "unreachable" )
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
@@ -128,8 +136,10 @@ let translate program =
         | UMinus -> (
           match e1 with
           | A.Int, _ -> L.build_neg
-          | A.Float, _ -> L.build_fneg )
-        | Not -> L.build_not )
+          | A.Float, _ -> L.build_fneg 
+          | _ -> failwith "unreachable" )
+        | Not -> L.build_not 
+        | _ -> failwith "unreachable" )
           e1' "tmp" builder
     | SCondExp (condition, e1, e2) ->
         let cond = build_expr condition var_table builder
@@ -140,12 +150,10 @@ let translate program =
         let add_formals builder m f p =
           match f with
           | A.Formal (n, f_typ) -> (
-            match f_typ with
-            | _ ->
-                L.set_value_name n p ;
-                let local = L.build_alloca (L.type_of p) n builder in
-                ignore (L.build_store p local builder) ;
-                StringMap.add n (f_typ, local) m )
+            L.set_value_name n p ;
+            let local = L.build_alloca (L.type_of p) n builder in
+            ignore (L.build_store p local builder) ;
+            StringMap.add n (f_typ, local) m )
         in
         match t with
         | Function (formal_types, ret_type) ->
@@ -164,41 +172,35 @@ let translate program =
                 (add_formals (L.builder_at_end context entry_bb))
                 var_table formals params_list
             in
-            let curr_handle = !handle in
-            func_table := IntMap.add curr_handle f !func_table ;
-            handle := Int64.succ curr_handle ;
             ignore
               (L.build_ret
                  (build_expr e new_var_table
                     (L.builder_at_end context entry_bb) )
                  (L.builder_at_end context entry_bb) ) ;
-            f )
+            f 
+        | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
-        let f =
-          match fexp with
-          | _ -> build_expr fexp var_table builder
-        in
-        (* let f = build_expr fexp var_table builder in *)
+        let f = build_expr fexp var_table builder in
         let llargs =
           List.map (fun x -> build_expr x var_table builder) args
         in
         L.build_call f (Array.of_list llargs) "result" builder
     | SAssign (id, rhs, exp) ->
         let new_var_table =
-          match rhs with
-          | (_ as t), _ ->
-              let rhs' = build_expr rhs var_table builder in
-              (* L.dump_value rhs'; *)
-              (* print_string (L.string_of_lltype (L.type_of rhs')); *)
-              let var = L.build_alloca (L.type_of rhs') id builder in
-              ignore (L.build_store rhs' var builder) ;
-              StringMap.add id (t, var) var_table
+          let t = fst rhs in
+          let rhs' = build_expr rhs var_table builder in
+          (* L.dump_value rhs'; *)
+          (* print_string (L.string_of_lltype (L.type_of rhs')); *)
+          let var = L.build_alloca (L.type_of rhs') id builder in
+          ignore (L.build_store rhs' var builder) ;
+          StringMap.add id (t, var) var_table
         in
         build_expr exp new_var_table builder
     | SVar var -> (
         let v = StringMap.find var var_table in
         match v with
         | _, llv -> L.build_load llv var builder )
+    | _ -> failwith "unimplemented"
   in
   ignore
     (L.build_ret
