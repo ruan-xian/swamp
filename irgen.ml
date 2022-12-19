@@ -108,17 +108,17 @@ let translate program =
         and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
         ( match op with
-        | A.Add -> (
+        | Add -> (
           match e1 with
           | A.Int, _ -> L.build_add
           | A.Float, _ -> L.build_fadd
           | _ -> failwith "unreachable" )
-        | A.Sub -> (
+        | Sub -> (
           match e1 with
           | A.Int, _ -> L.build_sub
           | A.Float, _ -> L.build_fsub
           | _ -> failwith "unreachable" )
-        | A.Mul -> (
+        | Mul -> (
           match e1 with
           | A.Int, _ -> L.build_mul
           | A.Float, _ -> L.build_fmul
@@ -128,7 +128,7 @@ let translate program =
           | A.Int, _ -> L.build_sdiv
           | A.Float, _ -> L.build_fdiv
           | _ -> failwith "unreachable" )
-        | A.Mod -> (
+        | Mod -> (
           match e1 with
           | A.Int, _ -> L.build_srem
           | A.Float, _ -> L.build_frem
@@ -137,7 +137,6 @@ let translate program =
           match e1 with
           | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Eq
           | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq
-          (* quick someone do the other types or smth idk *)
           | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
@@ -167,7 +166,8 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | UMinus | Cat | Cons | Head | Tail -> L.build_add )
+        | UMinus | Cat | Cons | Head | Tail | Not -> failwith "unreachable"
+        )
           e1' e2' "tmp" builder
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
@@ -202,7 +202,7 @@ let translate program =
         add_terminal (L.builder_at_end context then_bb) build_br_end ;
         add_terminal (L.builder_at_end context else_bb) build_br_end ;
         (* L.build_ret e2' (L.builder_at_end context else_bb) ; *)
-        L.build_cond_br bool_val then_bb else_bb builder ;
+        ignore (L.build_cond_br bool_val then_bb else_bb builder) ;
         (* L.build_select bool_val e1' e2' "cond-res" (L.builder_at_end
            context end_bb) *)
         L.build_load res "cond-ret" (L.builder_at_end context end_bb)
@@ -261,7 +261,10 @@ let translate program =
             ( match L.block_end f with
             | After bb ->
                 add_terminal (L.builder_at_end context bb) (L.build_ret ret)
-            ) ;
+            | At_start _ ->
+                failwith
+                  "why can't i get the end of the function huh llvm you \
+                   little" ) ;
             f
         | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
@@ -309,8 +312,12 @@ let translate program =
     (L.build_ret
        (build_expr program StringMap.empty f_init builder_init)
        builder_init ) ;
-  build_expr program StringMap.empty f_init builder_init ;
+  ignore (build_expr program StringMap.empty f_init builder_init) ;
   ( match L.block_end f_init with
   | After bb ->
-      L.build_ret (L.const_int i32_t 0) (L.builder_at_end context bb) ) ;
+      ignore
+        (L.build_ret (L.const_int i32_t 0) (L.builder_at_end context bb))
+  | At_start _ ->
+      failwith "why can't i get the end of the function huh llvm you little"
+  ) ;
   the_module
