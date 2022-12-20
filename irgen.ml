@@ -1,9 +1,7 @@
 (* IR generation: translate takes a semantically checked AST and produces
-   LLVM IR
-   LLVM tutorial: Make sure to read the OCaml version of the tutorial
-   http://llvm.org/docs/tutorial/index.html
-   Detailed documentation on the OCaml LLVM library:
-   http://llvm.moe/ http://llvm.moe/ocaml/ *)
+   LLVM IR LLVM tutorial: Make sure to read the OCaml version of the tutorial
+   http://llvm.org/docs/tutorial/index.html Detailed documentation on the
+   OCaml LLVM library: http://llvm.moe/ http://llvm.moe/ocaml/ *)
 
 module L = Llvm
 module A = Ast
@@ -154,7 +152,7 @@ let translate program =
         (* t1 == t2 bc we semanted *)
         let get_void e =
           let addr = L.build_alloca (L.type_of e) "arg" builder in
-          ignore(L.build_store e addr builder);
+          ignore (L.build_store e addr builder) ;
           L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder
         in
         match op with
@@ -232,7 +230,8 @@ let translate program =
         | Cat ->
             (L.build_call catList_f [|e1'; e2'|] "catList" builder, builder)
         | Cons ->
-            (L.build_call consList_f [| get_void(e1'); e2'|] "consList" builder, builder)
+            ( L.build_call consList_f [|get_void e1'; e2'|] "consList" builder
+            , builder )
         | _ -> failwith "unreachable" )
     | SUnaryOp (op, e1) -> (
         let e1', builder = build_expr e1 var_table the_function builder in
@@ -243,40 +242,43 @@ let translate program =
           | A.Float, _ -> (L.build_fneg e1' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Not -> (L.build_not e1' "tmp" builder, builder)
-        | Head -> 
-          let hd = L.build_call getHead_f [|e1'|] "getHead" builder in
-          let ptr = 
-            L.build_bitcast hd (L.pointer_type (ltype_of_typ t)) "voidp" builder 
-          in
-          (L.build_load ptr "hd" builder, builder)
+        | Head ->
+            let hd = L.build_call getHead_f [|e1'|] "getHead" builder in
+            let ptr =
+              L.build_bitcast hd
+                (L.pointer_type (ltype_of_typ t))
+                "voidp" builder
+            in
+            (L.build_load ptr "hd" builder, builder)
         | Tail -> (L.build_call getTail_f [|e1'|] "getTail" builder, builder)
         | _ -> failwith "unreachable" )
     | SCondExp (condition, e1, e2) ->
+        let orig_builder = builder in
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
         let bool_val, _ =
           build_expr condition var_table the_function builder
         in
         (* then bb *)
         let then_bb = L.append_block context "then" the_function in
-        let e1', _ =
+        let e1', builder =
           build_expr e1 var_table the_function
             (L.builder_at_end context then_bb)
         in
-        ignore (L.build_store e1' res (L.builder_at_end context then_bb)) ;
+        ignore (L.build_store e1' res builder) ;
         (* else bb *)
         let else_bb = L.append_block context "else" the_function in
-        let e2', _ =
+        let e2', builder =
           build_expr e2 var_table the_function
             (L.builder_at_end context else_bb)
         in
-        ignore (L.build_store e2' res (L.builder_at_end context else_bb)) ;
+        ignore (L.build_store e2' res builder) ;
         (* end bb *)
         let end_bb = L.append_block context "if_end" the_function in
         let build_br_end = L.build_br end_bb in
         add_terminal (L.builder_at_end context then_bb) build_br_end ;
         add_terminal (L.builder_at_end context else_bb) build_br_end ;
         (* fill out entry point *)
-        ignore (L.build_cond_br bool_val then_bb else_bb builder) ;
+        ignore (L.build_cond_br bool_val then_bb else_bb orig_builder) ;
         ( L.build_load res "cond-ret" (L.builder_at_end context end_bb)
         , L.builder_at_end context end_bb )
     | SListExp shrexlst ->
@@ -288,8 +290,10 @@ let translate program =
           | h :: t ->
               let e, _ = build_expr h var_table the_function builder in
               let addr = L.build_alloca (L.type_of e) "arg" builder in
-              ignore(L.build_store e addr builder);
-              let void_p = L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder in
+              ignore (L.build_store e addr builder) ;
+              let void_p =
+                L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder
+              in
               let node =
                 L.build_call newNode_f [|void_p|] "newNode" builder
               in
