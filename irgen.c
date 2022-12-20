@@ -36,18 +36,18 @@ char* concat(char* ptr1, char* ptr2) {
 
 }
 
-const char* intToString(int x) {
+const char* int_to_string(int x) {
     char *int_str = malloc(20);
     sprintf(int_str, "%d", x);
 
     return int_str;
 }
 
-const char* floatToString(float x) {
+const char* float_to_string(float x) {
     int len = snprintf(NULL, 0, "%f", x);
     char *float_str = malloc(len + 1);
     snprintf(float_str, len + 1, "%f", x);
-    
+
     return float_str;
 }
 
