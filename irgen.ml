@@ -267,7 +267,10 @@ let translate program =
           match slst with
           | h :: t ->
               let e = build_expr h var_table the_function builder in
-              let node = L.build_call newNode_f [|e|] "newNode" builder in
+              let addr = L.build_alloca (L.type_of e) "arg" builder in
+              let ptr = L.build_store e addr builder in
+              let void_p = L.build_bitcast ptr i8_t "voidp" builder in
+              let node = L.build_call newNode_f [|void_p|] "newNode" builder in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
               in
