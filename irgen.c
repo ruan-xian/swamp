@@ -7,6 +7,35 @@ int shreksays(const char *fmt) {
     return 0;
 }
 
+char* concat(char* ptr1, char* ptr2) {
+    int len_one = strlen(ptr1);
+    int len_two = strlen(ptr2);
+    char new[len_one + len_two + 1];
+
+    strncat(new, ptr1, len_one);
+    strncat(new, ptr2, len_two);
+
+    // int i;
+
+    // char* copy = ptr1;
+
+    // for (i = 0; i < len_one; i++) {
+    //     new[i] = *copy;
+    //     copy += 1;
+    // }
+
+    // copy = ptr2;
+
+    // for (i; i < (len_one + len_two); i++) {
+    //     new[i] = *copy;
+    //     copy += 1;
+    // }
+
+
+    return new;
+
+}
+
 const char* intToString(int x) {
     char *int_str = malloc(20);
     sprintf(int_str, "%d", x);
