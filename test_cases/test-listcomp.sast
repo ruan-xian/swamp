@@ -1,1 +1,0 @@
-(int : let l = (list<int> : [(int : 1);(int : 2);(int : 3);(int : 4);(int : 5)]) in (int : head (list<int> : [(int : (int : x) + (int : y)) for x in (list<int> : l) for y in (list<int> : [(int : 1);(int : 2);(int : 3)]) if (bool : (int : (int : x) % (int : 2)) = (int : 0))])))

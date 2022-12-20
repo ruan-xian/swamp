@@ -1,0 +1,2 @@
+let f(x:int, g:(int -> int)) = g(x) in
+shreksays(int_to_string(f(3, (fun(z:int) -> z + 2))))

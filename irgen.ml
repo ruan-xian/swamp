@@ -56,27 +56,19 @@ let translate program =
   let shreksays_t : L.lltype =
     L.var_arg_function_type i32_t [|L.pointer_type i8_t|]
   in
-  let shreksays_f : L.llvalue =
-    L.declare_function "shreksays" shreksays_t the_module
-  in
+  ignore (L.declare_function "shreksays" shreksays_t the_module) ;
   let int_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|i32_t|]
   in
-  let int_to_string_f : L.llvalue =
-    L.declare_function "int_to_string" int_to_string_t the_module
-  in
+  ignore (L.declare_function "int_to_string" int_to_string_t the_module) ;
   let float_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|float_t|]
   in
-  let float_to_string_f : L.llvalue =
-    L.declare_function "float_to_string" float_to_string_t the_module
-  in
+  ignore (L.declare_function "float_to_string" float_to_string_t the_module) ;
   let bool_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|i1_t|]
   in
-  let bool_to_string_f : L.llvalue =
-    L.declare_function "bool_to_string" bool_to_string_t the_module
-  in
+  ignore (L.declare_function "bool_to_string" bool_to_string_t the_module) ;
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
   in
