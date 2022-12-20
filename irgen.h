@@ -17,6 +17,8 @@ struct List {
 
 int shreksays(const char *fmt);
 
+char* concat(char* ptr1, char* ptr2);
+
 struct List *newEmptyList();
 struct Node *newNode(void *val);
 struct List *appendNode(struct List *l, struct Node *n);

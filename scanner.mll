@@ -18,7 +18,7 @@ let char = "'" (stringchar | '"') "'"
 let string = '"' (stringchar | "'")* '"'
 
 let opencomment = "0=|"
-let comment = opencomment (any | ['\t' '\\' '"' '\''])* "\n"
+let comment = opencomment (any | ['\t' '\\' '"' '\''])* ("\n" | eof)
 let whitechar = [' ' '\t'] | ('\r'?'\n')
 let whitestuff = whitechar | comment
 let whitespace = whitestuff+
@@ -88,8 +88,9 @@ rule tokenize = parse
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  
-  | char as lexeme { CHARLIT(String.get lexeme 1) }
-  | string as lexeme { STRINGLIT(lexeme) }
+  | char as lexeme { CHARLIT(String.get (Scanf.unescaped lexeme) 1) }
+  | string as lexeme { STRINGLIT(Scanf.unescaped (String.sub lexeme 1 ((String.length lexeme) - 2))) }
+  (* String.sub  *)
   | id as lexeme { ID(lexeme) }
   | eof { EOF }
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
