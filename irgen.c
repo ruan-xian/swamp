@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "irgen.h"
 #include <string.h>
+#include <stdbool.h>
 
 int shreksays(const char *fmt) {
     printf("%s", fmt);
@@ -17,23 +18,6 @@ char* concat(char* ptr1, char* ptr2) {
     strncat(new, ptr1, len_one);
     strncat(new, ptr2, len_two);
 
-    // int i;
-
-    // char* copy = ptr1;
-
-    // for (i = 0; i < len_one; i++) {
-    //     new[i] = *copy;
-    //     copy += 1;
-    // }
-
-    // copy = ptr2;
-
-    // for (i; i < (len_one + len_two); i++) {
-    //     new[i] = *copy;
-    //     copy += 1;
-    // }
-
-
     return new;
 
 }
@@ -41,7 +25,6 @@ char* concat(char* ptr1, char* ptr2) {
 const char* int_to_string(int x) {
     char *int_str = malloc(20);
     sprintf(int_str, "%d", x);
-
     return int_str;
 }
 
@@ -49,8 +32,18 @@ const char* float_to_string(float x) {
     int len = snprintf(NULL, 0, "%f", x);
     char *float_str = malloc(len + 1);
     snprintf(float_str, len + 1, "%f", x);
-
     return float_str;
+}
+
+const char* bool_to_string(bool x) {
+    char *bool_str = malloc(10);
+    if (x == true) {
+        bool_str = "True";
+    }
+    else {
+        bool_str = "False";
+    }
+    return bool_str;
 }
 
 struct List *newEmptyList() {

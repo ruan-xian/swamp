@@ -33,7 +33,6 @@ let translate program =
     | A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> float_t
-    | A.Char -> i8_t
     | A.String -> L.pointer_type i8_t
     | A.List t -> L.pointer_type (ltype_of_typ t)
     | A.Function (types, ret) ->
@@ -66,17 +65,23 @@ let translate program =
   let shreksays_f : L.llvalue =
     L.declare_function "shreksays" shreksays_t the_module
   in
-  let intToString_t : L.lltype =
+  let int_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|i32_t|]
   in
-  let intToString_f : L.llvalue =
-    L.declare_function "int_to_string" intToString_t the_module
+  let int_to_string_f : L.llvalue =
+    L.declare_function "int_to_string" int_to_string_t the_module
   in
-  let floatToString_t : L.lltype =
+  let float_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|float_t|]
   in
-  let floatToString_f : L.llvalue =
-    L.declare_function "float_to_string" floatToString_t the_module
+  let float_to_string_f : L.llvalue =
+    L.declare_function "float_to_string" float_to_string_t the_module
+  in
+  let bool_to_string_t : L.lltype =
+    L.var_arg_function_type (L.pointer_type i8_t) [|i1_t|]
+  in
+  let bool_to_string_f : L.llvalue =
+    L.declare_function "bool_to_string" bool_to_string_t the_module
   in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
@@ -146,7 +151,6 @@ let translate program =
     | SIntLit i -> (L.const_int i32_t i, builder)
     | SBoolLit b -> (L.const_int i1_t (if b then 1 else 0), builder)
     | SFloatLit f -> (L.const_float float_t f, builder)
-    | SCharLit c -> (L.const_int i8_t (Char.code c), builder)
     | SStringLit s -> (L.build_global_stringptr s "tmp" builder, builder)
     | SInfixOp (e1, op, e2) -> (
         let e1', _ = build_expr e1 var_table the_function builder
@@ -276,8 +280,13 @@ let translate program =
         let rec build_list slst llst =
           match slst with
           | h :: t ->
-              let e, builder = build_expr h var_table the_function builder in
-              let node = L.build_call newNode_f [|e|] "newNode" builder in
+              let e, _ = build_expr h var_table the_function builder in
+              let addr = L.build_alloca (L.type_of e) "arg" builder in
+              let ptr = L.build_store e addr builder in
+              let void_p = L.build_bitcast ptr i8_t "voidp" builder in
+              let node =
+                L.build_call newNode_f [|void_p|] "newNode" builder
+              in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
               in
