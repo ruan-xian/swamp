@@ -85,6 +85,13 @@ let translate program =
   let appendNode_f : L.llvalue =
     L.declare_function "appendNode" appendNode_t the_module
   in
+  let concat_t : L.lltype =
+    L.function_type (L.pointer_type i8_t) [|L.pointer_type i8_t; L.pointer_type i8_t|]
+  in
+  let concat_f : L.llvalue =
+    L.declare_function "concat" concat_t the_module
+  in
+  
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
   let f_init = L.define_function "main" ftype the_module in
@@ -102,73 +109,72 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
-    | SStringLit s -> L.const_stringz context s
+    | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) ->
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
-        ( match op with
-        | Add -> (
-          match e1 with
-          | A.Int, _ -> L.build_add
-          | A.Float, _ -> L.build_fadd
-          | _ -> failwith "unreachable" )
-        | Sub -> (
-          match e1 with
-          | A.Int, _ -> L.build_sub
-          | A.Float, _ -> L.build_fsub
-          | _ -> failwith "unreachable" )
-        | Mul -> (
-          match e1 with
-          | A.Int, _ -> L.build_mul
-          | A.Float, _ -> L.build_fmul
-          | _ -> failwith "unreachable" )
-        | A.Div -> (
-          match e1 with
-          | A.Int, _ -> L.build_sdiv
-          | A.Float, _ -> L.build_fdiv
-          | _ -> failwith "unreachable" )
-        | Mod -> (
-          match e1 with
-          | A.Int, _ -> L.build_srem
-          | A.Float, _ -> L.build_frem
-          | _ -> failwith "unreachable" )
-        | Eq -> (
-          match e1 with
-          | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Eq
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq
-          | _ -> failwith "unreachable" )
-        | Neq -> (
-          match e1 with
-          | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Ne
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Une
-          | _ -> failwith "unreachable" )
-        | Less -> (
-          match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Slt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult
-          | _ -> failwith "unreachable" )
-        | Greater -> (
-          match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sgt
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt
-          | _ -> failwith "unreachable" )
-        | Geq -> (
-          match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sge
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge
-          | _ -> failwith "unreachable" )
-        | Leq -> (
-          match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sle
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule
-          | _ -> failwith "unreachable" )
-        | And -> L.build_and
-        | Or -> L.build_or
-        (* TODO: PLACEHOLDERS *)
-        | UMinus | Cat | Cons | Head | Tail | Not -> failwith "unreachable"
-        )
-          e1' e2' "tmp" builder
+          (match op with
+          | Add -> (
+            match e1 with
+            | A.Int, _ -> L.build_add e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fadd e1' e2' "tmp" builder
+            | A.String,_ -> L.build_call concat_f [| e1'; e2'|] "concat" builder
+            | _ -> failwith "unreachable" )
+          | Sub -> (
+            match e1 with
+            | A.Int, _ -> L.build_sub e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fsub e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Mul -> (
+            match e1 with
+            | A.Int, _ -> L.build_mul e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fmul e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Div -> (
+            match e1 with
+            | A.Int, _ -> L.build_sdiv e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fdiv e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Mod -> (
+            match e1 with
+            | A.Int, _ -> L.build_srem e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_frem e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Eq -> (
+            match e1 with
+            | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Neq -> (
+            match e1 with
+            | A.Int, _ | A.Bool, _ -> L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Une e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Less -> (
+            match e1 with
+            | A.Int, _ -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Ult e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Greater -> (
+            match e1 with
+            | A.Int, _ -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Geq -> (
+            match e1 with
+            | A.Int, _ -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Uge e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | Leq -> (
+            match e1 with
+            | A.Int, _ -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
+            | A.Float, _ -> L.build_fcmp L.Fcmp.Ule e1' e2' "tmp" builder
+            | _ -> failwith "unreachable" )
+          | And -> L.build_and e1' e2' "tmp" builder
+          | Or -> L.build_or e1' e2' "tmp" builder
+          (* TODO: PLACEHOLDERS *)
+          | UMinus | Cat | Cons | Head | Tail | Not -> failwith "unreachable")
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
         ( match op with
