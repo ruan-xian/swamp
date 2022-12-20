@@ -10,7 +10,9 @@ int shreksays(const char *fmt) {
 char* concat(char* ptr1, char* ptr2) {
     int len_one = strlen(ptr1);
     int len_two = strlen(ptr2);
-    char new[len_one + len_two + 1];
+    int n = len_one + len_two + 1;
+    // char new[len_one + len_two + 1];
+    char* new = (char*) malloc(n * sizeof(char));
 
     strncat(new, ptr1, len_one);
     strncat(new, ptr2, len_two);
