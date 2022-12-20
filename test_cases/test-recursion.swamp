@@ -1,0 +1,6 @@
+let onion f = fun(n: int) ->
+	if n <= 0 then 0
+	else
+		let placeholder = shreksays(int_to_string(n) + "\n") in
+		f(n-1)
+in f(5)
