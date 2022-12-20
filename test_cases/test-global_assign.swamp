@@ -1,4 +1,4 @@
 let f = fun(x:int) -> 
 	let y = x 
 	in y + x 
-in f(3)
+in shreksays(int_to_string(f(3)))
