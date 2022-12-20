@@ -10,7 +10,9 @@ int shreksays(const char *fmt) {
 char* concat(char* ptr1, char* ptr2) {
     int len_one = strlen(ptr1);
     int len_two = strlen(ptr2);
-    char new[len_one + len_two + 1];
+    int n = len_one + len_two + 1;
+    // char new[len_one + len_two + 1];
+    char* new = (char*) malloc(n * sizeof(char));
 
     strncat(new, ptr1, len_one);
     strncat(new, ptr2, len_two);
@@ -77,3 +79,28 @@ struct List *appendNode(struct List *l, struct Node *n) {
     }
     return l;
 }
+
+struct List *catList(struct List *l1, struct List *l2) {
+    (l1->end)->next = l2->head;
+    l1->end = l2->end;
+
+    return l1;
+}
+
+struct List *consList(void *val, struct List *l) {
+    struct Node *n = newNode(val);
+    n->next = l->head;
+    l->head = n;
+
+    return l;
+}
+
+void *getHead(struct List *l) {
+    return (l->head)->val;
+}
+
+struct List *getTail(struct List *l) {
+    l->head = (l->head)->next;
+
+    return l;
+}    
