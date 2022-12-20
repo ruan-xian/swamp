@@ -1,0 +1,2 @@
+0=| Expected value: "DA" |=0
+let x = 'D' + 'A' in shreksays(x)

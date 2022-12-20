@@ -1,0 +1,2 @@
+0=| Expected value: "D get out of my swamp!" |=0
+let x = 'D ' + "get out of my swamp!" in shreksays(x)
