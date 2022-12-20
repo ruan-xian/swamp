@@ -66,6 +66,18 @@ let translate program =
   let shreksays_f : L.llvalue =
     L.declare_function "shreksays" shreksays_t the_module
   in
+  let intToString_t : L.lltype =
+    L.var_arg_function_type (L.pointer_type i8_t) [|i32_t|]
+  in
+  let intToString_f : L.llvalue =
+    L.declare_function "intToString" intToString_t the_module
+  in
+  let floatToString_t : L.lltype =
+    L.var_arg_function_type (L.pointer_type i8_t) [|float_t|]
+  in
+  let floatToString_f : L.llvalue =
+    L.declare_function "floatToString" floatToString_t the_module
+  in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
   in
@@ -317,10 +329,7 @@ let translate program =
           | None -> raise (Failure (var ^ "not found in var_table")) ) )
     | _ -> failwith "unimplemented"
   in
-  ignore
-    (L.build_ret
-       (build_expr program StringMap.empty f_init builder_init)
-       builder_init ) ;
+  ignore (build_expr program StringMap.empty f_init builder_init) ;
   ( match L.block_end f_init with
   | After bb ->
       ignore

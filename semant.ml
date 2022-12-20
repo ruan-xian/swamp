@@ -279,4 +279,8 @@ let check program =
   in
   let ssays_t = Function([String], Int) in
   let ttable = StringMap.add "shreksays" ssays_t StringMap.empty in
+  let iint_to_string = Function([Int], String) in
+  let ttable = StringMap.add "intToString" iint_to_string ttable in
+  let ffloat_to_string = Function([Float], String) in
+  let ttable = StringMap.add "floatToString" ffloat_to_string ttable in
   match program with Expr e -> check_expr ttable e
