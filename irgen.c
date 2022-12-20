@@ -48,7 +48,7 @@ const char* bool_to_string(bool x) {
 
 int isEmptyList(struct List *l) {
     if (!(l->head)) {
-	return 1;
+	    return 1;
     }
     return 0;
 }
@@ -126,6 +126,7 @@ struct List *getTail(struct List *l) {
     }
 
     struct List *newlist = newEmptyList(); 
+    n = n->next;
     while (n) {
 	struct Node *nn = newNode(n->val);
 	appendNode(newlist, nn);

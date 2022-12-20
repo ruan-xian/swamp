@@ -24,12 +24,18 @@ let translate program =
   and i1_t = L.i1_type context
   and float_t = L.float_type context in
   (* Return the LLVM type for a MicroC type *)
+  let node_t : L.lltype = L.named_struct_type context "Node" in
+  L.struct_set_body node_t
+    [|L.pointer_type i8_t; L.pointer_type node_t|]
+    false ;
+  let list_t : L.lltype = L.named_struct_type context "List" in
+  L.struct_set_body list_t [|L.pointer_type node_t; i32_t|] false ;
   let rec ltype_of_typ = function
     | A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> float_t
     | A.String -> L.pointer_type i8_t
-    | A.List t -> L.pointer_type (ltype_of_typ t)
+    | A.List t -> L.pointer_type (list_t)
     | A.Function (types, ret) ->
         let formal_types = Array.of_list (List.map ltype_of_typ types) in
         L.pointer_type (L.function_type (ltype_of_typ ret) formal_types)
@@ -42,17 +48,11 @@ let translate program =
    *    struct Node *next;
    * };
    *)
-  let node_t : L.lltype = L.named_struct_type context "Node" in
-  L.struct_set_body node_t
-    [|L.pointer_type i8_t; L.pointer_type node_t|]
-    false ;
   (* struct List {
    *    struct Node *head;
    *    int len;
    * };
    *)
-  let list_t : L.lltype = L.named_struct_type context "List" in
-  L.struct_set_body list_t [|L.pointer_type node_t; i32_t|] false ;
   (* Library Function Declarations *)
   let shreksays_t : L.lltype =
     L.var_arg_function_type i32_t [|L.pointer_type i8_t|]
