@@ -150,16 +150,11 @@ let translate program =
     | SFloatLit f -> L.const_float float_t f
     | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
-    | SInfixOp (e1, op, e2) -> (
+    | SInfixOp (e1, op, e2) -> 
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
-        if op = Cat then
-          L.build_call catList_f [| e1' ; e2' |] "catList" builder
-        else if op = Cons then
-          L.build_call consList_f [| e1' ; e2' |] "consList" builder
-        else
-        ( match op with
+        (match op with
         | Add -> (
           match e1 with
           | A.Int, _ -> L.build_add e1' e2' "tmp" builder
@@ -221,25 +216,23 @@ let translate program =
           | _ -> failwith "unreachable" )
         | And -> L.build_and e1' e2' "tmp" builder
         | Or -> L.build_or e1' e2' "tmp" builder
-        (* TODO: PLACEHOLDERS *)
-        )
-          e1' e2' "tmp" builder
+        | Cat -> L.build_call catList_f [| e1' ; e2' |] "catList" builder
+        | Cons ->  L.build_call consList_f [| e1' ; e2' |] "consList" builder
+        | _ -> failwith "unreachable")
+
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
-        if op = Head then
-          L.build_call getHead_f [| e1' |] "getHead" builder
-        else if op = Tail then
-          L.build_call getTail_f [| e1' |] "getTail" builder
-        else
-        ( match op with
+        (match op with
         | UMinus -> (
           match e1 with
-          | A.Int, _ -> L.build_neg
-          | A.Float, _ -> L.build_fneg
+          | A.Int, _ -> L.build_neg e1' "tmp" builder
+          | A.Float, _ -> L.build_fneg e1' "tmp" builder
           | _ -> failwith "unreachable" )
-        | Not -> L.build_not
-        | _ -> failwith "unreachable" )
-          e1' "tmp" builder
+        | Not -> L.build_not e1' "tmp" builder
+        | Head -> L.build_call getHead_f [| e1' |] "getHead" builder
+        | Tail -> L.build_call getTail_f [| e1' |] "getTail" builder
+        | _ -> failwith "unreachable")
+
     | SCondExp (condition, e1, e2) ->
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
         let bool_val = build_expr condition var_table the_function builder in
