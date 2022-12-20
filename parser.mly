@@ -6,13 +6,12 @@
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
 %token AND OR NOT UMINUS
-%token TYPE COLON INTTYPE FLOATTYPE CHARTYPE STRTYPE BOOLTYPE LISTTYPE
+%token TYPE COLON INTTYPE FLOATTYPE STRTYPE BOOLTYPE LISTTYPE
 
 %token <int> INTLIT
 %token <bool> BOOLLIT
 %token <float> FLOATLIT
 %token <string> ID STRINGLIT
-%token <char> CHARLIT
 
 // %left SEMI
 %left IN
@@ -92,7 +91,6 @@ expr:
   | BOOLLIT { BoolLit $1 }
   | FLOATLIT { FloatLit $1 }
   | STRINGLIT { StringLit $1 }
-  | CHARLIT { CharLit $1 }
 
     // Parenthesized Expressions
   | LPAREN expr RPAREN { ParenExp($2) }
@@ -129,7 +127,6 @@ formal:
 typ:
     INTTYPE   { Int }
   | FLOATTYPE  { Float }
-  | CHARTYPE  { Char }
   | STRTYPE  { String }
   | BOOLTYPE  { Bool }
   | LISTTYPE LESS typ GREATER { List($3) }

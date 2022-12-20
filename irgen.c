@@ -17,23 +17,6 @@ char* concat(char* ptr1, char* ptr2) {
     strncat(new, ptr1, len_one);
     strncat(new, ptr2, len_two);
 
-    // int i;
-
-    // char* copy = ptr1;
-
-    // for (i = 0; i < len_one; i++) {
-    //     new[i] = *copy;
-    //     copy += 1;
-    // }
-
-    // copy = ptr2;
-
-    // for (i; i < (len_one + len_two); i++) {
-    //     new[i] = *copy;
-    //     copy += 1;
-    // }
-
-
     return new;
 
 }

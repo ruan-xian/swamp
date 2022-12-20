@@ -6,7 +6,6 @@ type operator = Add | Sub | Mul | Div | Mod
 type typ = 
     Int 
   | Float 
-  | Char 
   | String 
   | Bool 
   | List of typ 
@@ -27,7 +26,6 @@ and expr =
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
-  | CharLit of char
   | ParenExp of expr
   | ListExp of expr list
   | EmptyList of typ 
@@ -71,7 +69,6 @@ let rec string_of_list stringify = function
 let rec string_of_typ = function
     Int -> "int"
   | Float -> "float"
-  | Char -> "char"
   | String -> "string"
   | Bool -> "bool"
   | List(typ) -> "list<" ^ string_of_typ typ ^ ">"
@@ -85,7 +82,6 @@ let rec string_of_expr = function
   | Var(s) -> s
   | IntLit(l) -> string_of_int l 
   | StringLit(l) -> l 
-  | CharLit(l) -> String.make 1 l 
   | FloatLit(l) -> string_of_float l
   | BoolLit(l) -> string_of_bool l
   | Assign(s, e1, e2) -> "let " ^ s ^ " = " ^ string_of_expr e1 ^ " in " ^ string_of_expr e2
