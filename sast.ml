@@ -15,7 +15,6 @@ and sx =
   | SBoolLit of bool
   | SFloatLit of float
   | SStringLit of string
-  | SCharLit of char
   | SListExp of shrexpr list
   | SListComp of shrexpr * squal list
   | SFunExp of formal list * shrexpr
@@ -33,7 +32,6 @@ let rec string_of_shrexpr (t, e) =
     | SVar(s) -> s
     | SIntLit(l) -> string_of_int l 
     | SStringLit(l) -> l 
-    | SCharLit(l) -> String.make 1 l 
     | SFloatLit(l) -> string_of_float l
     | SBoolLit(l) -> string_of_bool l
     | SAssign(s, e1, e2) -> "let " ^ s ^ " = " ^ string_of_shrexpr e1 ^ " in " ^ string_of_shrexpr e2
