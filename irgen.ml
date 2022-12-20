@@ -79,6 +79,12 @@ let translate program =
   let bool_to_string_f : L.llvalue =
     L.declare_function "bool_to_string" bool_to_string_t the_module
   in
+  let isEmptyList_t : L.lltype =
+    L.function_type (i1_t) [| L.pointer_type list_t|]
+  in
+  let isEmptyList_f : L.llvalue =
+    L.declare_function "newEmptyList" isEmptyList_t the_module
+  in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
   in

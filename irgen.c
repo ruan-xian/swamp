@@ -47,7 +47,6 @@ const char* bool_to_string(bool x) {
 }
 
 struct List *newEmptyList() {
-    printf("nEmptyL\n");
     struct List *new = malloc(sizeof(struct List));
     memset(new, 0, sizeof(struct List));
 
@@ -55,7 +54,6 @@ struct List *newEmptyList() {
 }
 
 struct Node *newNode(void *val) {
-    printf("nNode\n");
     struct Node *new = malloc(sizeof(struct Node));
     memset(new, 0, sizeof(struct Node));
 
@@ -66,7 +64,6 @@ struct Node *newNode(void *val) {
 }
 
 struct List *appendNode(struct List *l, struct Node *n) {
-    printf("appendNode\n");
     if (!(l->head)) {
 	l->head = n;
 	l->end = n;
@@ -78,17 +75,16 @@ struct List *appendNode(struct List *l, struct Node *n) {
 }
 
 struct List *catList(struct List *l1, struct List *l2) {
-    printf("catList\n");
     struct List *new = newEmptyList();
     struct Node *curr = l1->head;
 
-    while(curr != l1->end) {
+    while(curr) {
 	struct Node *n = newNode(curr->val);
 	appendNode(new, n);
 	curr = curr->next;
     }
     curr = l2->head;
-    while(curr != l2->end) {
+    while(curr) {
 	struct Node *n = newNode(curr->val);
 	appendNode(new, n);
 	curr = curr->next;
@@ -98,28 +94,32 @@ struct List *catList(struct List *l1, struct List *l2) {
 }
 
 struct List *consList(void *val, struct List *l) {
-    printf("consList\n");
+    struct List *new = newEmptyList();
     struct Node *n = newNode(val);
-    n->next = l->head;
-    l->head = n;
+    
+    appendNode(new, n);
+    struct Node *curr = l->head;
+    while(curr) {
+	struct Node *n = newNode(curr->val);
+	appendNode(new, n);
+	curr = curr->next;
+    }
 
-    return l;
+    return new;
 }
 
 void *getHead(struct List *l) {
-    printf("getHead\n");
     return (l->head)->val;
 }
 
 struct List *getTail(struct List *l) {
-    printf("getTail\n");
     struct Node *n = l->head;
     if(!(n->next)) {
 	return newEmptyList();
     }
 
     struct List *newlist = newEmptyList(); 
-    while (n != (l->end)) {
+    while (n) {
 	struct Node *nn = newNode(n->val);
 	appendNode(newlist, nn);
 	n = n->next;
