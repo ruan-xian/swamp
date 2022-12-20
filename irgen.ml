@@ -70,13 +70,13 @@ let translate program =
     L.var_arg_function_type (L.pointer_type i8_t) [|i32_t|]
   in
   let intToString_f : L.llvalue =
-    L.declare_function "intToString" intToString_t the_module
+    L.declare_function "int_to_string" intToString_t the_module
   in
   let floatToString_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|float_t|]
   in
   let floatToString_f : L.llvalue =
-    L.declare_function "floatToString" floatToString_t the_module
+    L.declare_function "float_to_string" floatToString_t the_module
   in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
