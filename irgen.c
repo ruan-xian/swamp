@@ -7,6 +7,18 @@ int shreksays(const char *fmt) {
     return 0;
 }
 
+const char* intToString(int x) {
+    char int_str[20];
+    sprintf(int_str, "%d", x);
+    return int_str;
+}
+
+const char* floatToString(float x) {
+    char float_str[50];
+    fprintf(float_str, "%f", x);
+    return float_str;
+}
+
 struct List *newEmptyList() {
     struct List *new = malloc(sizeof(struct List));
     memset(new, 0, sizeof(struct List));
