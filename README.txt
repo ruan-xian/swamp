@@ -6,9 +6,11 @@
 		Cindy Zhu (cwz2102) - Tester
 
 To use:
-make 											generates the swamp compiler
-./swamp example.swamp > example.out				writes out llvm code (no C functions here)
-./compile_swamp.sh example.swamp				compiles to example.exe; C functions properly linked
+make 											generates the swamp compiler - run this first
+./compile_swamp.sh example.swamp				compiles to example.exe; C functions properly linked. This is for general use
+
+./swamp example.swamp > example.out				writes out llvm code (no C functions here). This is for debugging
+
 ./autotest.sh [-sk]								runs all tests (or specified tests). -s for SAST mode, -k to keep intermediate files
 ./autotest.sh [-sk] example.swamp				runs only the test for this Swamp file
 
