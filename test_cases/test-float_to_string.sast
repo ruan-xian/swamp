@@ -1,0 +1,1 @@
+(int : let x = (float : - (float : 83.3)) in (int : let y = (string : ((float -> string) : float_to_string)((float : x))) in (int : ((string -> int) : shreksays)((string : y)))))

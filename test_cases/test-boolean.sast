@@ -1,1 +1,1 @@
-(bool : let x = (bool : true) in (bool : let y = (bool : false) in (bool : (bool : not (bool : y)) and (bool : x))))
+(int : let x = (bool : true) in (int : let y = (bool : false) in (int : ((string -> int) : shreksays)((string : ((bool -> string) : bool_to_string)((bool : (bool : not (bool : y)) and (bool : x))))))))
