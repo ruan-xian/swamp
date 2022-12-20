@@ -7,7 +7,7 @@
 
 # Path to the LLVM interpreter
 LLI="lli"
-which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli"
+which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli" || LLI = "/opt/homebrew/Cellar/llvm@14/14.0.6/bin/lli"
 
 # Path to the LLVM compiler
 LLC="llc"
