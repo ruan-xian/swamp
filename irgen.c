@@ -8,14 +8,17 @@ int shreksays(const char *fmt) {
 }
 
 const char* intToString(int x) {
-    char int_str[20];
+    char *int_str = malloc(20);
     sprintf(int_str, "%d", x);
+
     return int_str;
 }
 
 const char* floatToString(float x) {
-    char float_str[50];
-    fprintf(float_str, "%f", x);
+    int len = snprintf(NULL, 0, "%f", x);
+    char *float_str = malloc(len + 1);
+    snprintf(float_str, len + 1, "%f", x);
+    
     return float_str;
 }
 
