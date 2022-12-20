@@ -191,7 +191,12 @@ then
     exit 1
 fi
 
-files="test_cases/test-*.swamp test_cases/bad-*.swamp"
+if [ $# -ge 1 ]
+then
+    files=$@
+else
+    files="test_cases/test-*.swamp test_cases/bad-*.swamp"
+fi
 
 for file in $files
 do
