@@ -1,5 +1,4 @@
-(* IR generation: translate takes a semantically checked AST and produces
-   LLVM IR
+(* IR generation: translate takes a semantically checked AST and produces LLVM IR
    LLVM tutorial: Make sure to read the OCaml version of the tutorial
    http://llvm.org/docs/tutorial/index.html
    Detailed documentation on the OCaml LLVM library:
@@ -80,7 +79,7 @@ let translate program =
     L.declare_function "bool_to_string" bool_to_string_t the_module
   in
   let isEmptyList_t : L.lltype =
-    L.function_type (i1_t) [| L.pointer_type list_t|]
+    L.function_type (i1_t) [|L.pointer_type list_t|]
   in
   let isEmptyList_f : L.llvalue =
     L.declare_function "newEmptyList" isEmptyList_t the_module
@@ -256,6 +255,7 @@ let translate program =
           in
           (L.build_load ptr "hd" builder, builder)
         | Tail -> (L.build_call getTail_f [|e1'|] "getTail" builder, builder)
+        | IsEmpty -> (L.build_call isEmptyList_f [|e1'|] "isEmpty" builder, builder)
         | _ -> failwith "unreachable" )
     | SCondExp (condition, e1, e2) ->
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in

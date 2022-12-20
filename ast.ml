@@ -1,7 +1,7 @@
 type operator = Add | Sub | Mul | Div | Mod 
               | Eq | Less | Greater | Geq | Leq | Neq 
               | And | Or | Not | UMinus
-              | Cat | Cons | Head | Tail
+              | Cat | Cons | Head | Tail | IsEmpty
               
 type typ = 
     Int 
@@ -59,7 +59,7 @@ let string_of_op = function
   | Cons -> "::"
   | Head -> "head"
   | Tail -> "tail"
-
+  | IsEmpty -> "isEmpty"
 
 let rec string_of_list stringify = function
 [] -> ""

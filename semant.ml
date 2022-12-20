@@ -72,7 +72,11 @@ let check program =
             match t with
             | List typ -> (List typ, SUnaryOp (op, (t, e')))
             | _ -> raise (Failure err) )
-          | _ -> raise (Failure err) )
+          | IsEmpty -> (
+            match t with
+            | List typ -> (Bool, SUnaryOp(op, (t, e')))
+            | _ -> raise (Failure err) )
+          | _ -> raise (Failure err))
     | CondExp (condition, e1, e2) as ex ->
         let t, e' = check_expr type_table condition in
         if t = Bool || t = Unknown then

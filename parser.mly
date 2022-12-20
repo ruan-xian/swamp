@@ -1,7 +1,7 @@
 %{ open Ast %}
 
 %token COMMA SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE EOF
-%token CONS CAT HEAD TAIL
+%token CONS CAT HEAD TAIL ISEMPTY
 %token PLUS MINUS MULT DIV MOD ASSIGN EQUAL LESS GREATER LEQ GEQ NEQ ARROW
 %token IN LET IF THEN ELSE WHERE FOR BY OVER ONION STRICT FUN
 %token NONE WILDCARD
@@ -27,7 +27,7 @@
 %nonassoc UMINUS NOT
 
 %left CONS CAT
-%nonassoc TAIL HEAD
+%nonassoc TAIL HEAD ISEMPTY
 
 %start program
 %type <Ast.program> program
@@ -85,6 +85,7 @@ expr:
   | expr CAT expr { InfixOp($1, Cat, $3) }
   | HEAD expr { UnaryOp(Head, $2) }
   | TAIL expr { UnaryOp(Tail, $2) }
+  | ISEMPTY expr { UnaryOp(IsEmpty, $2) }
 
     // Literals
   | INTLIT { IntLit $1 }
