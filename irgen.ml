@@ -260,23 +260,23 @@ let translate program =
         in
         (* then bb *)
         let then_bb = L.append_block context "then" the_function in
-        let e1', builder =
+        let e1', e1_builder =
           build_expr e1 var_table the_function
             (L.builder_at_end context then_bb)
         in
-        ignore (L.build_store e1' res builder) ;
+        ignore (L.build_store e1' res e1_builder) ;
         (* else bb *)
         let else_bb = L.append_block context "else" the_function in
-        let e2', builder =
+        let e2', e2_builder =
           build_expr e2 var_table the_function
             (L.builder_at_end context else_bb)
         in
-        ignore (L.build_store e2' res builder) ;
+        ignore (L.build_store e2' res e2_builder) ;
         (* end bb *)
         let end_bb = L.append_block context "if_end" the_function in
         let build_br_end = L.build_br end_bb in
-        add_terminal (L.builder_at_end context then_bb) build_br_end ;
-        add_terminal (L.builder_at_end context else_bb) build_br_end ;
+        add_terminal e1_builder build_br_end ;
+        add_terminal e2_builder build_br_end ;
         (* fill out entry point *)
         ignore (L.build_cond_br bool_val then_bb else_bb orig_builder) ;
         ( L.build_load res "cond-ret" (L.builder_at_end context end_bb)
