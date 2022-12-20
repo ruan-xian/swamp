@@ -7,4 +7,4 @@ let plus = fun(a:int, b:int) -> a + b
 in
 let res = fold_left(plus, 0, [1; 2; 3; 4; 5])
 in
-shreksays(int_to_string(res))
+shreksays(int_to_string(res) + "\n")
