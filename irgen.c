@@ -63,8 +63,10 @@ struct List *newEmptyList() {
 struct Node *newNode(void *val) {
     struct Node *new = malloc(sizeof(struct Node));
     memset(new, 0, sizeof(struct Node));
+    void *new_data = malloc(8);
+    memcpy(new_data, val, 8);
 
-    new->val = val;
+    new->val = new_data;
     new->next = NULL;
 
     return new;

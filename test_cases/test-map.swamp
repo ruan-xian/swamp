@@ -1,4 +1,4 @@
-0=| We combine map and a tail-recursive fibonacci to print the specified fibonacci numbers. |=0
+0=| We combine map, a tail-recursive fibonacci, and a recursive list constructor to print the specified fibonacci numbers. |=0
 
 let onion map(op: (int -> int), l: list<int>) =
 	if isEmpty l then [int]
@@ -17,5 +17,4 @@ let onion count(min: int, max: int) =
 	else
 		min :: count(min + 1, max)
 in
-map(fun(x:int)->shreksays(int_to_string(fibonacci(x, 0, 1)) + " "),
-	count(0, 15))
+map(fun(x:int)->shreksays(int_to_string(fibonacci(x, 0, 1)) + " "), count(0, 15))
