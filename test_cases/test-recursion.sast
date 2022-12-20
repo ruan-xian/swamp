@@ -1,0 +1,2 @@
+(int : let onion f = ((int -> int) : fun(n:int) -> (int : if (bool : (int : n) <= (int : 0)) then (int : 0) else (int : let placeholder = (int : ((string -> int) : shreksays)((string : (string : ((int -> string) : int_to_string)((int : n))) + (string : 
+)))) in (int : ((int -> int) : f)((int : (int : n) - (int : 1))))))) in (int : ((int -> int) : f)((int : 5))))
