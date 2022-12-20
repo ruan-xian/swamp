@@ -326,6 +326,7 @@ let translate program =
         in
         match t with
         | Function (formal_types, ret_type) ->
+            let orig_builder = builder in
             let lformal_types =
               Array.of_list (List.map (fun t -> ltype_of_typ t) formal_types)
             in
@@ -346,7 +347,8 @@ let translate program =
               build_expr e new_var_table f
                 (L.builder_at_end context entry_bb)
             in
-            (f, builder)
+            add_terminal builder (L.build_ret ret) ;
+            (f, orig_builder)
         | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
         let f, builder = build_expr fexp var_table the_function builder in
