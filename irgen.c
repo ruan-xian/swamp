@@ -7,7 +7,6 @@ int shreksays(const char *fmt) {
     return 0;
 }
 
-<<<<<<< HEAD
 char* concat(char* ptr1, char* ptr2) {
     int len_one = strlen(ptr1);
     int len_two = strlen(ptr2);
@@ -37,7 +36,6 @@ char* concat(char* ptr1, char* ptr2) {
 
 }
 
-=======
 const char* intToString(int x) {
     char int_str[20];
     sprintf(int_str, "%d", x);
@@ -49,7 +47,6 @@ const char* floatToString(float x) {
     fprintf(float_str, "%f", x);
     return float_str;
 }
->>>>>>> 790998362fd67ade290dc1f55c3765deb99c5841
 
 struct List *newEmptyList() {
     struct List *new = malloc(sizeof(struct List));

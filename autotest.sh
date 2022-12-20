@@ -7,16 +7,15 @@
 
 # Path to the LLVM interpreter
 LLI="lli"
-<<<<<<< HEAD
 which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli" 
 which "$LLI" || LLI="/opt/homebrew/opt/llvm/bin/lli"
-=======
-which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli" || LLI = "/opt/homebrew/Cellar/llvm@14/14.0.6/bin/lli"
->>>>>>> 790998362fd67ade290dc1f55c3765deb99c5841
+which "$LLI" || LLI="/opt/homebrew/Cellar/llvm@14/14.0.6/bin/lli"
 
 # Path to the LLVM compiler
 LLC="llc"
 which "$LLC" || LLC="/usr/local/opt/llvm@14/bin/llc"
+which "$LLC" || LLC="/opt/homebrew/opt/llvm/bin/llc"
+which "$LLC" || LLC="/opt/homebrew/Cellar/llvm@14/14.0.6/bin/llc"
 
 # Path to the C compiler
 CC="cc"
