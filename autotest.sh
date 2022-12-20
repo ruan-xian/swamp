@@ -11,12 +11,14 @@ which "$LLI" || LLI="/usr/local/opt/llvm@14/bin/lli" || LLI = "/opt/homebrew/Cel
 
 # Path to the LLVM compiler
 LLC="llc"
+which "$LLC" || LLC="/usr/local/opt/llvm@14/bin/llc"
 
 # Path to the C compiler
 CC="cc"
 
 # Path to the swamp compiler. 
 SWAMP="./swamp"
+CFUNCS="./irgen.o"
 
 # Set time limit for all operations
 ulimit -t 30
@@ -94,9 +96,11 @@ Check() {
 
 	if [ "$sast" -eq 0 ]
     then
-    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
+    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out ${basename}.s ${basename}.exe" &&
     Run "$SWAMP" "-l $1" ">" "${basename}.ll" &&
-    Run "$LLI" "${basename}.ll; echo \$?" ">" "${basename}.out" &&
+    Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "$CFUNCS" &&
+    Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 	else
     generatedfiles="$generatedfiles ${basename}.sast" &&
@@ -175,6 +179,13 @@ LLIFail() {
 }
 
 which "$LLI" >> $globallog || LLIFail
+
+if [ ! -f "$CFUNCS" ]
+then
+    echo "Could not find irgen.o"
+    echo "Remember to run make!"
+    exit 1
+fi
 
 files="test_cases/test-*.swamp test_cases/bad-*.swamp"
 
