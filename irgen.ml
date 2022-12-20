@@ -163,71 +163,82 @@ let translate program =
           L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder 
         in
         (* t1 == t2 bc we semanted *)
-        (match op with
+        match op with
         | Add -> (
           match e1 with
-          | A.Int, _ -> L.build_add e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fadd e1' e2' "tmp" builder
+          | A.Int, _ -> (L.build_add e1' e2' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_fadd e1' e2' "tmp" builder, builder)
           | A.String, _ ->
-              L.build_call concat_f [|e1'; e2'|] "concat" builder
+              (L.build_call concat_f [|e1'; e2'|] "concat" builder, builder)
           | _ -> failwith "unreachable" )
         | Sub -> (
           match e1 with
-          | A.Int, _ -> L.build_sub e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fsub e1' e2' "tmp" builder
+          | A.Int, _ -> (L.build_sub e1' e2' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_fsub e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Mul -> (
           match e1 with
-          | A.Int, _ -> L.build_mul e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fmul e1' e2' "tmp" builder
+          | A.Int, _ -> (L.build_mul e1' e2' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_fmul e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Div -> (
           match e1 with
-          | A.Int, _ -> L.build_sdiv e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fdiv e1' e2' "tmp" builder
+          | A.Int, _ -> (L.build_sdiv e1' e2' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_fdiv e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Mod -> (
           match e1 with
-          | A.Int, _ -> L.build_srem e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_frem e1' e2' "tmp" builder
+          | A.Int, _ -> (L.build_srem e1' e2' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_frem e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Eq -> (
           match e1 with
           | A.Int, _ | A.Bool, _ ->
-              L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ueq e1' e2' "tmp" builder
+              (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Ueq e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Neq -> (
           match e1 with
           | A.Int, _ | A.Bool, _ ->
-              L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Une e1' e2' "tmp" builder
+              (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Une e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Less -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ult e1' e2' "tmp" builder
+          | A.Int, _ ->
+              (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Ult e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Greater -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ugt e1' e2' "tmp" builder
+          | A.Int, _ ->
+              (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Ugt e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Geq -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Uge e1' e2' "tmp" builder
+          | A.Int, _ ->
+              (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Uge e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Leq -> (
           match e1 with
-          | A.Int, _ -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
-          | A.Float, _ -> L.build_fcmp L.Fcmp.Ule e1' e2' "tmp" builder
+          | A.Int, _ ->
+              (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder, builder)
+          | A.Float, _ ->
+              (L.build_fcmp L.Fcmp.Ule e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | And -> L.build_and e1' e2' "tmp" builder
         | Or -> L.build_or e1' e2' "tmp" builder
         | Cat -> 
             L.build_call catList_f [| e1'; e2' |] "catList" builder
-        | Cons ->  L.build_call consList_f [| get_void(e1'); e2' |] "consList" builder
+        | Cons ->  
+            L.build_call consList_f [| get_void(e1'); e2' |] "consList" builder
         | _ -> failwith "unreachable")
 
     | SUnaryOp (op, e1) ->
@@ -235,8 +246,8 @@ let translate program =
         (match op with
         | UMinus -> (
           match e1 with
-          | A.Int, _ -> L.build_neg e1' "tmp" builder
-          | A.Float, _ -> L.build_fneg e1' "tmp" builder
+          | A.Int, _ -> (L.build_neg e1' "tmp" builder, builder)
+          | A.Float, _ -> (L.build_fneg e1' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
         | Not -> L.build_not e1' "tmp" builder
         | Head -> 
@@ -250,30 +261,32 @@ let translate program =
 
     | SCondExp (condition, e1, e2) ->
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
-        let bool_val = build_expr condition var_table the_function builder in
+        let bool_val, _ =
+          build_expr condition var_table the_function builder
+        in
+        (* then bb *)
         let then_bb = L.append_block context "then" the_function in
-        let e1' =
+        let e1', _ =
           build_expr e1 var_table the_function
             (L.builder_at_end context then_bb)
         in
         ignore (L.build_store e1' res (L.builder_at_end context then_bb)) ;
-        (* L.build_ret e1' (L.builder_at_end context then_bb) ; *)
+        (* else bb *)
         let else_bb = L.append_block context "else" the_function in
-        let e2' =
+        let e2', _ =
           build_expr e2 var_table the_function
             (L.builder_at_end context else_bb)
         in
         ignore (L.build_store e2' res (L.builder_at_end context else_bb)) ;
+        (* end bb *)
         let end_bb = L.append_block context "if_end" the_function in
         let build_br_end = L.build_br end_bb in
-        (* partial function *)
         add_terminal (L.builder_at_end context then_bb) build_br_end ;
         add_terminal (L.builder_at_end context else_bb) build_br_end ;
-        (* L.build_ret e2' (L.builder_at_end context else_bb) ; *)
+        (* fill out entry point *)
         ignore (L.build_cond_br bool_val then_bb else_bb builder) ;
-        (* L.build_select bool_val e1' e2' "cond-res" (L.builder_at_end
-           context end_bb) *)
-        L.build_load res "cond-ret" (L.builder_at_end context end_bb)
+        ( L.build_load res "cond-ret" (L.builder_at_end context end_bb)
+        , L.builder_at_end context end_bb )
     | SListExp shrexlst ->
         let emptylist =
           L.build_call newEmptyList_f [||] "newEmptyList" builder
@@ -281,7 +294,7 @@ let translate program =
         let rec build_list slst llst =
           match slst with
           | h :: t ->
-              let e = build_expr h var_table the_function builder in
+              let e, _ = build_expr h var_table the_function builder in
               let addr = L.build_alloca (L.type_of e) "arg" builder in
               ignore(L.build_store e addr builder);
               let void_p = L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder in
@@ -292,7 +305,14 @@ let translate program =
               build_list t llst'
           | [] -> llst
         in
-        build_list shrexlst emptylist
+        let builder =
+          match L.block_end the_function with
+          | After bb -> L.builder_at_end context bb
+          | At_start _ ->
+              failwith
+                "why can't i get the end of the function huh llvm you little"
+        in
+        (build_list shrexlst emptylist, builder)
     | SFunExp (formals, e) -> (
         let add_formals builder m f p =
           match f with
@@ -303,12 +323,10 @@ let translate program =
               in
               ignore (L.build_store p var builder) ;
               StringMap.add n (t, var) m
-          (* let local = L.build_alloca (L.type_of p) n builder in ignore
-             (L.build_store p local builder) ; StringMap.add n (f_typ, local)
-             m *)
         in
         match t with
         | Function (formal_types, ret_type) ->
+            let orig_builder = builder in
             let lformal_types =
               Array.of_list (List.map (fun t -> ltype_of_typ t) formal_types)
             in
@@ -325,57 +343,58 @@ let translate program =
                 (add_formals (L.builder_at_end context entry_bb))
                 var_table formals params_list
             in
-            let ret =
+            let ret, builder =
               build_expr e new_var_table f
                 (L.builder_at_end context entry_bb)
             in
-            ( match L.block_end f with
-            | After bb ->
-                add_terminal (L.builder_at_end context bb) (L.build_ret ret)
-            | At_start _ ->
-                failwith
-                  "why can't i get the end of the function huh llvm you \
-                   little" ) ;
-            f
+            add_terminal builder (L.build_ret ret) ;
+            (f, orig_builder)
         | _ -> failwith "not a function" )
     | SFunApp (fexp, args) ->
-        let f = build_expr fexp var_table the_function builder in
-        let llargs =
-          List.map
-            (fun x -> build_expr x var_table the_function builder)
-            args
+        let f, builder = build_expr fexp var_table the_function builder in
+        let rec apply_build the_args builder =
+          match the_args with
+          | [] -> ([], builder)
+          | hd :: tl ->
+              let llarg, builder =
+                build_expr hd var_table the_function builder
+              in
+              (llarg :: fst (apply_build tl builder), builder)
         in
-        L.build_call f (Array.of_list llargs) "result" builder
+        let llargs, builder = apply_build args builder in
+        (L.build_call f (Array.of_list llargs) "result" builder, builder)
     | SAssign (id, rhs, exp) ->
-        let new_var_table =
-          let t = fst rhs in
-          let rhs' = build_expr rhs var_table the_function builder in
-          let var =
-            L.define_global id (L.const_null (L.type_of rhs')) the_module
-          in
-          ignore (L.build_store rhs' var builder) ;
-          StringMap.add id (t, var) var_table
+        let t = fst rhs in
+        let rhs', builder = build_expr rhs var_table the_function builder in
+        let var =
+          L.define_global id (L.const_null (L.type_of rhs')) the_module
         in
-        build_expr exp new_var_table the_function builder
+        ignore (L.build_store rhs' var builder) ;
+        let new_var_table = StringMap.add id (t, var) var_table in
+        let ret, builder =
+          build_expr exp new_var_table the_function builder
+        in
+        (ret, builder)
     | SAssignRec (id, rhs, exp) ->
-        let new_var_table =
-          let t = fst rhs in
-          let var =
-            L.define_global id (L.const_null (ltype_of_typ t)) the_module
-          in
-          let temp = StringMap.add id (t, var) var_table in
-          let rhs' = build_expr rhs temp the_function builder in
-          ignore (L.build_store rhs' var builder) ;
-          temp
+        let t = fst rhs in
+        let var =
+          L.define_global id (L.const_null (ltype_of_typ t)) the_module
         in
-        build_expr exp new_var_table the_function builder
+        let temp = StringMap.add id (t, var) var_table in
+        let rhs', builder = build_expr rhs temp the_function builder in
+        ignore (L.build_store rhs' var builder) ;
+        let new_var_table = temp in
+        let ret, builder =
+          build_expr exp new_var_table the_function builder
+        in
+        (ret, builder)
     | SVar var -> (
         let v = StringMap.find_opt var var_table in
         match v with
-        | Some (_, llv) -> L.build_load llv var builder
+        | Some (_, llv) -> (L.build_load llv var builder, builder)
         | None -> (
           match L.lookup_function var the_module with
-          | Some f -> f
+          | Some f -> (f, builder)
           | None -> raise (Failure (var ^ "not found in var_table")) ) )
     | _ -> failwith "unimplemented"
   in
