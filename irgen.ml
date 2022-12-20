@@ -1,12 +1,8 @@
 (* IR generation: translate takes a semantically checked AST and produces
    LLVM IR
-
    LLVM tutorial: Make sure to read the OCaml version of the tutorial
-
    http://llvm.org/docs/tutorial/index.html
-
    Detailed documentation on the OCaml LLVM library:
-
    http://llvm.moe/ http://llvm.moe/ocaml/ *)
 
 module L = Llvm
@@ -117,15 +113,13 @@ let translate program =
     L.declare_function "consList" consList_t the_module
   in
   let getHead_t : L.lltype =
-    L.function_type (L.pointer_type i8_t)
-      [|L.pointer_type list_t|]
+    L.function_type (L.pointer_type i8_t) [|L.pointer_type list_t|]
   in
   let getHead_f : L.llvalue =
     L.declare_function "getHead" getHead_t the_module
   in
   let getTail_t : L.lltype =
-    L.function_type (L.pointer_type list_t)
-      [|L.pointer_type list_t|]
+    L.function_type (L.pointer_type list_t) [|L.pointer_type list_t|]
   in
   let getTail_f : L.llvalue =
     L.declare_function "getTail" getTail_t the_module
@@ -150,19 +144,19 @@ let translate program =
   let rec build_expr ((t, e) : shrexpr) (var_table : var_binding_map)
       the_function builder =
     match e with
-    | SIntLit i -> L.const_int i32_t i
-    | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
-    | SFloatLit f -> L.const_float float_t f
-    | SStringLit s -> L.build_global_stringptr s "tmp" builder
-    | SInfixOp (e1, op, e2) -> 
-        let e1' = build_expr e1 var_table the_function builder
-        and e2' = build_expr e2 var_table the_function builder in
-        let get_void e = 
+    | SIntLit i -> (L.const_int i32_t i, builder)
+    | SBoolLit b -> (L.const_int i1_t (if b then 1 else 0), builder)
+    | SFloatLit f -> (L.const_float float_t f, builder)
+    | SStringLit s -> (L.build_global_stringptr s "tmp" builder, builder)
+    | SInfixOp (e1, op, e2) -> (
+        let e1', _ = build_expr e1 var_table the_function builder
+        and e2', builder = build_expr e2 var_table the_function builder in
+        (* t1 == t2 bc we semanted *)
+        let get_void e =
           let addr = L.build_alloca (L.type_of e) "arg" builder in
           ignore(L.build_store e addr builder);
-          L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder 
+          L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder
         in
-        (* t1 == t2 bc we semanted *)
         match op with
         | Add -> (
           match e1 with
@@ -233,32 +227,30 @@ let translate program =
           | A.Float, _ ->
               (L.build_fcmp L.Fcmp.Ule e1' e2' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
-        | And -> L.build_and e1' e2' "tmp" builder
-        | Or -> L.build_or e1' e2' "tmp" builder
-        | Cat -> 
-            L.build_call catList_f [| e1'; e2' |] "catList" builder
-        | Cons ->  
-            L.build_call consList_f [| get_void(e1'); e2' |] "consList" builder
-        | _ -> failwith "unreachable")
-
-    | SUnaryOp (op, e1) ->
-        let e1' = build_expr e1 var_table the_function builder in
-        (match op with
+        | And -> (L.build_and e1' e2' "tmp" builder, builder)
+        | Or -> (L.build_or e1' e2' "tmp" builder, builder)
+        | Cat ->
+            (L.build_call catList_f [|e1'; e2'|] "catList" builder, builder)
+        | Cons ->
+            (L.build_call consList_f [| get_void(e1'); e2'|] "consList" builder, builder)
+        | _ -> failwith "unreachable" )
+    | SUnaryOp (op, e1) -> (
+        let e1', builder = build_expr e1 var_table the_function builder in
+        match op with
         | UMinus -> (
           match e1 with
           | A.Int, _ -> (L.build_neg e1' "tmp" builder, builder)
           | A.Float, _ -> (L.build_fneg e1' "tmp" builder, builder)
           | _ -> failwith "unreachable" )
-        | Not -> L.build_not e1' "tmp" builder
+        | Not -> (L.build_not e1' "tmp" builder, builder)
         | Head -> 
-          let hd = L.build_call getHead_f [| e1' |] "getHead" builder in
+          let hd = L.build_call getHead_f [|e1'|] "getHead" builder in
           let ptr = 
             L.build_bitcast hd (L.pointer_type (ltype_of_typ t)) "voidp" builder 
           in
-          L.build_load ptr "hd" builder
-        | Tail -> L.build_call getTail_f [| e1' |] "getTail" builder
-        | _ -> failwith "unreachable")
-
+          (L.build_load ptr "hd" builder, builder)
+        | Tail -> (L.build_call getTail_f [|e1'|] "getTail" builder, builder)
+        | _ -> failwith "unreachable" )
     | SCondExp (condition, e1, e2) ->
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
         let bool_val, _ =
@@ -298,7 +290,9 @@ let translate program =
               let addr = L.build_alloca (L.type_of e) "arg" builder in
               ignore(L.build_store e addr builder);
               let void_p = L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder in
-              let node = L.build_call newNode_f [|void_p|] "newNode" builder in
+              let node =
+                L.build_call newNode_f [|void_p|] "newNode" builder
+              in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
               in
