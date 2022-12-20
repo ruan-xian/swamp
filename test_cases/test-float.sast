@@ -1,1 +1,1 @@
-(float : let x = (float : 2.1) in (float : let y = (float : 300.) in (float : let z = (float : 0.0002) in (float : (float : (float : - (float : x)) / (float : y)) + (float : z)))))
+(int : let x = (float : 2.1) in (int : let y = (float : 300.) in (int : let z = (float : 0.0002) in (int : ((string -> int) : shreksays)((string : ((float -> string) : float_to_string)((float : (float : (float : - (float : x)) / (float : y)) + (float : z)))))))))

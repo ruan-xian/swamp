@@ -1,4 +1,0 @@
-0=| Expected value: Not implemented |=0
-0=| did not implement function things in calc.ml so expected value is not correct |=0
-let f1 = fun(x:int, y:(int, float -> list<char>)) -> let c = 2 in c * x + y in
-f1

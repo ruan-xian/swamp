@@ -33,7 +33,6 @@ let translate program =
     | A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> float_t
-    | A.Char -> i8_t
     | A.String -> L.pointer_type i8_t
     | A.List t -> L.pointer_type (ltype_of_typ t)
     | A.Function (types, ret) ->
@@ -66,17 +65,23 @@ let translate program =
   let shreksays_f : L.llvalue =
     L.declare_function "shreksays" shreksays_t the_module
   in
-  let intToString_t : L.lltype =
+  let int_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|i32_t|]
   in
-  let intToString_f : L.llvalue =
-    L.declare_function "int_to_string" intToString_t the_module
+  let int_to_string_f : L.llvalue =
+    L.declare_function "int_to_string" int_to_string_t the_module
   in
-  let floatToString_t : L.lltype =
+  let float_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|float_t|]
   in
-  let floatToString_f : L.llvalue =
-    L.declare_function "float_to_string" floatToString_t the_module
+  let float_to_string_f : L.llvalue =
+    L.declare_function "float_to_string" float_to_string_t the_module
+  in
+  let bool_to_string_t : L.lltype =
+    L.var_arg_function_type (L.pointer_type i8_t) [|i1_t|]
+  in
+  let bool_to_string_f : L.llvalue =
+    L.declare_function "bool_to_string" bool_to_string_t the_module
   in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
@@ -148,7 +153,6 @@ let translate program =
     | SIntLit i -> L.const_int i32_t i
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
-    | SCharLit c -> L.const_int i8_t (Char.code c)
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
     | SInfixOp (e1, op, e2) -> 
         let e1' = build_expr e1 var_table the_function builder

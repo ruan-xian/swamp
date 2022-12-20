@@ -14,8 +14,7 @@ let float = (((decimal?'.'decimal) | (decimal '.' decimal?))exponent?) | (decima
 let escape = '\\' ['\\' '\'' '"' 'n' 't']
 let any = letter | digit | symbol
 let stringchar = any | escape
-let char = "'" (stringchar | '"') "'"
-let string = '"' (stringchar | "'")* '"'
+let string = ('"' (stringchar | "'")* '"') |  ("'" (stringchar | '"')* "'")
 
 let opencomment = "0=|"
 let comment = opencomment (any | ['\t' '\\' '"' '\''])* ("\n" | eof)
@@ -80,7 +79,6 @@ rule tokenize = parse
 (* types *)
   | "int" { INTTYPE }
   | "float" { FLOATTYPE }
-  | "char" { CHARTYPE }
   | "string" { STRTYPE }
   | "bool" { BOOLTYPE }
   | "list" { LISTTYPE }
@@ -88,7 +86,6 @@ rule tokenize = parse
 (* non reserved *)
   | int as lexeme { INTLIT(int_of_string lexeme) }
   | float as lexeme { FLOATLIT(float_of_string lexeme) }  
-  | char as lexeme { CHARLIT(String.get (Scanf.unescaped lexeme) 1) }
   | string as lexeme { STRINGLIT(Scanf.unescaped (String.sub lexeme 1 ((String.length lexeme) - 2))) }
   (* String.sub  *)
   | id as lexeme { ID(lexeme) }

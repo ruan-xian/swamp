@@ -1,1 +1,1 @@
-(int : let h = ((int -> ( -> int)) : fun(x:int) -> (( -> int) : fun() -> (int : x))) in (int : (( -> int) : ((int -> ( -> int)) : h)((int : 2)))()))
+(int : let h = ((int -> ( -> int)) : fun(x:int) -> (( -> int) : fun() -> (int : x))) in (int : ((string -> int) : shreksays)((string : ((int -> string) : int_to_string)((int : (( -> int) : ((int -> ( -> int)) : h)((int : 2)))()))))))

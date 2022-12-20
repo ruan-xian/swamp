@@ -37,7 +37,6 @@ let check program =
               let t =
                 match op with
                 | Add when t1 = String -> String
-                | Add when t1 = Char -> String
                 | (Add | Sub | Mul | Div | Mod) when t1 = Int || t1 = Float
                   ->
                     t1
@@ -52,9 +51,6 @@ let check program =
                 | _ -> raise (Failure err)
               in
               (t, SInfixOp ((t1, e1'), op, (t2, e2')))
-          | false
-            when (t1 = Char && t2 = String) || (t1 = String && t2 = Char) ->
-              (String, SInfixOp ((t1, e1'), op, (t2, e2')))
           | false when op = Cons && t2 = List t1 ->
               (t2, SInfixOp ((t1, e1'), Cons, (t2, e2')))
           | _ -> raise (Failure err) )
@@ -101,7 +97,6 @@ let check program =
     | FloatLit l -> (Float, SFloatLit l)
     | BoolLit l -> (Bool, SBoolLit l)
     | StringLit l -> (String, SStringLit l)
-    | CharLit l -> (Char, SCharLit l)
     | ParenExp e -> check_expr type_table e
     | Var var -> (type_of_identifier type_table var, SVar var)
     | EmptyList t -> (List t, SListExp [])
@@ -283,4 +278,6 @@ let check program =
   let ttable = StringMap.add "int_to_string" iint_to_string ttable in
   let ffloat_to_string = Function([Float], String) in
   let ttable = StringMap.add "float_to_string" ffloat_to_string ttable in
+  let bbool_to_string = Function([Bool], String) in
+  let ttable = StringMap.add "bool_to_string" bbool_to_string ttable in
   match program with Expr e -> check_expr ttable e
