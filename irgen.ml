@@ -85,6 +85,35 @@ let translate program =
   let appendNode_f : L.llvalue =
     L.declare_function "appendNode" appendNode_t the_module
   in
+  let catList_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type list_t; L.pointer_type list_t|]
+  in
+  let catList_f : L.llvalue =
+    L.declare_function "catList" appendNode_t the_module
+  in
+  let consList_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type i8_t; L.pointer_type list_t|]
+  in
+  let consList_f : L.llvalue =
+    L.declare_function "consList" appendNode_t the_module
+  in
+  let getHead_f : L.lltype =
+    L.function_type (L.pointer_type i8_t)
+      [|L.pointer_type list_t|]
+  in
+  let getHead_f : L.llvalue =
+    L.declare_function "getHead" appendNode_t the_module
+  in
+  let getTail_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type list_t|]
+  in
+  let getTail_f : L.llvalue =
+    L.declare_function "getTail" appendNode_t the_module
+  in
+
   (* Create stub entry point function "main" *)
   let ftype = L.function_type i32_t (Array.of_list []) in
   let f_init = L.define_function "main" ftype the_module in
@@ -107,6 +136,11 @@ let translate program =
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
+        if op = Cat then
+          L.build_call catList_f [| e1' ; e2' |] "catList" builder
+        else if op = Cons then
+          L.build_call consList_f [| e1' ; e2' |] "consList" builder
+        else
         ( match op with
         | Add -> (
           match e1 with
@@ -166,11 +200,15 @@ let translate program =
         | And -> L.build_and
         | Or -> L.build_or
         (* TODO: PLACEHOLDERS *)
-        | UMinus | Cat | Cons | Head | Tail | Not -> failwith "unreachable"
         )
           e1' e2' "tmp" builder
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
+        if op = Head then
+          L.build_call getHead_f [| e1' |] "getHead" builder
+        else if op = Tail then
+          L.build_call getTail_f [| e1' |] "getTail" builder
+        else
         ( match op with
         | UMinus -> (
           match e1 with
