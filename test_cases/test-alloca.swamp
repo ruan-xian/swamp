@@ -1,2 +1,2 @@
 let f = fun(x:int) -> x in let g = 20 in 
-shreksays(intToString(f(3)))
+shreksays(int_to_string(f(3)))

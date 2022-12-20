@@ -1,2 +1,2 @@
 let f = fun(c:int) -> (fun(z:int) -> z)(c) in
-f(3)
+shreksays(int_to_string(f(3)))
