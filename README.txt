@@ -16,6 +16,8 @@ make 											generates the swamp compiler - run this first
 
 If you want to manually compile Swamp LLVM to C-linked Swamp, check the contents of compile_swamp.sh.
 
+Finally, for a great language demo, check out test-map.swamp in our test cases!
+
 Files:
 	ast.ml										abstract syntax tree definition
 	autotest.sh									automated testing script
