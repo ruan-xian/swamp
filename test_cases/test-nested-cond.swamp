@@ -1,0 +1,7 @@
+shreksays(
+	if 1 == 2 
+		then "a" 
+		else 
+			if 2 + 2 == 4 
+				then "b" 
+				else "c")
