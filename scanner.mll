@@ -51,6 +51,7 @@ rule tokenize = parse
   | "::" { CONS }
   | "head" { HEAD }
   | "tail" { TAIL }
+  | "isEmpty" { ISEMPTY }
 (* function operators *)
   | "->" { ARROW } 
 (* boolean operators *)

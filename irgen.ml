@@ -1,7 +1,8 @@
-(* IR generation: translate takes a semantically checked AST and produces
-   LLVM IR LLVM tutorial: Make sure to read the OCaml version of the tutorial
-   http://llvm.org/docs/tutorial/index.html Detailed documentation on the
-   OCaml LLVM library: http://llvm.moe/ http://llvm.moe/ocaml/ *)
+(* IR generation: translate takes a semantically checked AST and produces LLVM IR
+   LLVM tutorial: Make sure to read the OCaml version of the tutorial
+   http://llvm.org/docs/tutorial/index.html
+   Detailed documentation on the OCaml LLVM library:
+   http://llvm.moe/ http://llvm.moe/ocaml/ *)
 
 module L = Llvm
 module A = Ast
@@ -70,9 +71,11 @@ let translate program =
   in
     ignore (L.declare_function "bool_to_string" bool_to_string_t the_module) ;
   let isEmptyList_t : L.lltype =
-    L.function_type (i1_t) [| L.pointer_type list_t|]
+    L.function_type (i1_t) [|L.pointer_type list_t|]
   in
-    ignore (L.declare_function "isEmptyList" isEmptyList_t the_module) ;
+  let isEmptyList_f : L.llvalue =
+    L.declare_function "isEmptyList" isEmptyList_t the_module
+  in
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
   in
@@ -247,6 +250,7 @@ let translate program =
             in
             (L.build_load ptr "hd" builder, builder)
         | Tail -> (L.build_call getTail_f [|e1'|] "getTail" builder, builder)
+        | IsEmpty -> (L.build_call isEmptyList_f [|e1'|] "isEmpty" builder, builder)
         | _ -> failwith "unreachable" )
     | SCondExp (condition, e1, e2) ->
         let orig_builder = builder in

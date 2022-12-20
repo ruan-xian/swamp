@@ -1,6 +1,6 @@
 let onion fold_left = 
 	fun(op: (int, int -> int), acc:int, l: list<int>) ->
-		if isEmptyList(l) then acc
+		if isEmpty l then acc
 		else fold_left(op, op(acc, head l), tail l)
 in
 let plus = fun(a:int, b:int) -> a + b

@@ -46,6 +46,13 @@ const char* bool_to_string(bool x) {
     return bool_str;
 }
 
+int isEmptyList(struct List *l) {
+    if (!(l->head)) {
+	return 1;
+    }
+    return 0;
+}
+
 struct List *newEmptyList() {
     struct List *new = malloc(sizeof(struct List));
     memset(new, 0, sizeof(struct List));
