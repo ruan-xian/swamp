@@ -283,4 +283,6 @@ let check program =
   let ttable = StringMap.add "int_to_string" iint_to_string ttable in
   let ffloat_to_string = Function([Float], String) in
   let ttable = StringMap.add "float_to_string" ffloat_to_string ttable in
+  let bbool_to_string = Function([Bool], String) in
+  let ttable = StringMap.add "bool_to_string" bbool_to_string ttable in
   match program with Expr e -> check_expr ttable e
