@@ -68,7 +68,11 @@ let translate program =
   let bool_to_string_t : L.lltype =
     L.var_arg_function_type (L.pointer_type i8_t) [|i1_t|]
   in
-  ignore (L.declare_function "bool_to_string" bool_to_string_t the_module) ;
+    ignore (L.declare_function "bool_to_string" bool_to_string_t the_module) ;
+  let isEmptyList_t : L.lltype =
+    L.function_type (i1_t) [| L.pointer_type list_t|]
+  in
+    ignore (L.declare_function "isEmptyList" isEmptyList_t the_module) ;
   let newEmptyList_t : L.lltype =
     L.function_type (L.pointer_type list_t) [||]
   in
