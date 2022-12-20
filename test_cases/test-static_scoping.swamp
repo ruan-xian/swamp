@@ -1,3 +1,4 @@
+0=| demonstrates how the x in g doesn't overwrite the x in f |=0
 let f = fun(x:int) ->
 	let g = fun(x:int) ->
 		0

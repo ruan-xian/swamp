@@ -1,2 +1,2 @@
-0=| Expected value: Illegal character ^ |=0
+0=| Illegal character ^ |=0
 let x = 3 in ^

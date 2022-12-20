@@ -1,0 +1,9 @@
+0=| Tail recursion will always work properly in Swamp and is encouraged. |=0
+let onion fibonacci(n: int, a: int, b:int) =
+	if n == 0 then a
+	else 
+		if n == 1 then b
+	else 
+		fibonacci(n - 1, b, a + b)
+in
+shreksays(int_to_string(fibonacci(10, 0, 1)) + "\n")

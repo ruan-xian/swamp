@@ -1,2 +1,3 @@
+0=| Tests basic first-class functions |=0
 let f = fun(c:int) -> (fun(z:int) -> z)(c) in
 shreksays(int_to_string(f(3)))

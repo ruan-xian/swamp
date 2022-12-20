@@ -1,3 +1,4 @@
+0=| First class funcs taking no arguments |=0
 let h = fun(x:int) -> (fun() -> x)
 in
 shreksays(int_to_string((h(2))()))

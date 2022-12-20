@@ -1,1 +1,0 @@
-(int : let f = ((int -> int) : fun(x:int) -> (int : x)) in (int : let g = (int : 20) in (int : ((string -> int) : shreksays)((string : ((int -> string) : int_to_string)((int : ((int -> int) : f)((int : 3)))))))))

@@ -1,5 +1,5 @@
-0=| Expected value: Not implemented |=0
-0=| did not implement function things in calc.ml so expected value is not correct |=0
+0=| Demonstrates the limitations behind our recursion; instead of the nth fibonacci number, fib(n) will return n |=0
+0=| This is because all calls to fib(n) share the same n so they continually replace n (so the fib(n-2) call always returns 1) |=0
 
 let onion fib = fun(n:int) ->
   if n <= 1 then 1

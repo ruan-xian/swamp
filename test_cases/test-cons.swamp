@@ -1,0 +1,7 @@
+0=| test list cons |=0
+let onion count(min: int) =
+	if min == 15 then [15]
+	else
+		min :: count(min + 1)
+in
+shreksays(int_to_string(head tail count(0)))

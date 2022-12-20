@@ -1,3 +1,4 @@
+0=| Wow! It's fold_left! |=0
 let onion fold_left = 
 	fun(op: (int, int -> int), acc:int, l: list<int>) ->
 		if isEmpty l then acc

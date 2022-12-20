@@ -1,3 +1,4 @@
+0=| Demonstrates how recursion can still be used validly |=0
 let onion gcd = fun(a: int, b: int) ->
 	if a == b then a
 	else

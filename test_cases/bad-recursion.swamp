@@ -1,3 +1,4 @@
+0=| This fails because there's no base case for the recursion meaning we can't infer the type |=0
 let onion f = fun(n:int) ->
   f(n+1)
 in f(0)

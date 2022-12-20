@@ -1,3 +1,4 @@
+0=| more testing of first-class functions |=0
 let f = fun(g:(int -> int), c:int) -> g(c) in
 let h = fun(a:int) -> a + 2 in
 shreksays(int_to_string(f(h, 4)))

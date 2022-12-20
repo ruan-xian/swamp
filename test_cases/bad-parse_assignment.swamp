@@ -1,2 +1,2 @@
-0=| Expected value: Parse_error |=0
+0=| This just doesn't actually make sense if you think about it |=0
 let x + y = 3 in x

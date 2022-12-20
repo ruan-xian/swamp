@@ -1,3 +1,0 @@
-let a = fun(x:int) -> x + 1 in
-let b = fun(y:int) -> a(y) in
-shreksays(intToString(b(0)))

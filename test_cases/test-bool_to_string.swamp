@@ -1,3 +1,3 @@
-0=| Expected value: printf("True") |=0
+0=| take one guess what this tests |=0
 let x = True in let y = bool_to_string(x) in
 shreksays(y)

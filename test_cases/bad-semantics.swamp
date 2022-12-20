@@ -1,2 +1,2 @@
-0=| Expected value: Semantic error (not booleans) |=0
+0=| Operands of "and" must both be booleans |=0
 3 and 4

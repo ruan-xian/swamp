@@ -1,2 +1,2 @@
-0=| Expected value: 18216 |=0
+0=| Believe it or not this tests conditional expression |=0
 shreksays(int_to_string(if 2 + 3 >= 5 % 2 and 1==1 then (14 + 32) * 396 else 3))

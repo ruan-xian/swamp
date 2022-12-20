@@ -1,0 +1,21 @@
+0=| We combine map and a tail-recursive fibonacci to print the specified fibonacci numbers. |=0
+
+let onion map(op: (int -> int), l: list<int>) =
+	if isEmpty l then [int]
+	else op(head l) :: map(op, tail l)
+in
+let onion fibonacci(n: int, a: int, b:int) =
+	if n == 0 then a
+	else 
+		if n == 1 then b
+	else 
+		fibonacci(n - 1, b, a + b)
+in
+0=| return a list from min to max, inclusive |=0
+let onion count(min: int, max: int) =
+	if min == max then [int]
+	else
+		min :: count(min + 1, max)
+in
+map(fun(x:int)->shreksays(int_to_string(fibonacci(x, 0, 1)) + " "),
+	count(0, 15))

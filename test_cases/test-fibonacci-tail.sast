@@ -1,0 +1,2 @@
+(int : let onion fibonacci = ((int, int, int -> int) : fun(n:int, a:int, b:int) -> (int : if (bool : (int : n) = (int : 0)) then (int : a) else (int : if (bool : (int : n) = (int : 1)) then (int : b) else (int : ((int, int, int -> int) : fibonacci)((int : (int : n) - (int : 1)), (int : b), (int : (int : a) + (int : b))))))) in (int : ((string -> int) : shreksays)((string : (string : ((int -> string) : int_to_string)((int : ((int, int, int -> int) : fibonacci)((int : 10), (int : 0), (int : 1))))) + (string : 
+)))))

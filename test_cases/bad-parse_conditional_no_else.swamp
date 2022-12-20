@@ -1,2 +1,2 @@
-0=| Expected value: Parse_error |=0
+0=| Conditionals MUST have an "else" because everything is an expression in Swamp |=0
 if 2 + 3 == 5 then 12
