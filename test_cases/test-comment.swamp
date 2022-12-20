@@ -1,2 +1,2 @@
-shreksays("hello\n")
+shreksays("This tests comments without a trailing newline\n")
 0=| this comment has no endline after

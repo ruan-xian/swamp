@@ -4,4 +4,4 @@
 let onion fib = fun(n:int) ->
   if n <= 1 then 1
   else fib(n-1) + fib(n-2)
-in fib(6)
+in shreksays(int_to_string(fib(6)))

@@ -96,6 +96,34 @@ let translate program =
   let appendNode_f : L.llvalue =
     L.declare_function "appendNode" appendNode_t the_module
   in
+  let catList_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type list_t; L.pointer_type list_t|]
+  in
+  let catList_f : L.llvalue =
+    L.declare_function "catList" appendNode_t the_module
+  in
+  let consList_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type i8_t; L.pointer_type list_t|]
+  in
+  let consList_f : L.llvalue =
+    L.declare_function "consList" appendNode_t the_module
+  in
+  let getHead_f : L.lltype =
+    L.function_type (L.pointer_type i8_t)
+      [|L.pointer_type list_t|]
+  in
+  let getHead_f : L.llvalue =
+    L.declare_function "getHead" appendNode_t the_module
+  in
+  let getTail_f : L.lltype =
+    L.function_type (L.pointer_type list_t)
+      [|L.pointer_type list_t|]
+  in
+  let getTail_f : L.llvalue =
+    L.declare_function "getTail" appendNode_t the_module
+  in
   let concat_t : L.lltype =
     L.function_type (L.pointer_type i8_t)
       [|L.pointer_type i8_t; L.pointer_type i8_t|]
@@ -120,11 +148,11 @@ let translate program =
     | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
     | SFloatLit f -> L.const_float float_t f
     | SStringLit s -> L.build_global_stringptr s "tmp" builder
-    | SInfixOp (e1, op, e2) -> (
+    | SInfixOp (e1, op, e2) -> 
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
         (* t1 == t2 bc we semanted *)
-        match op with
+        (match op with
         | Add -> (
           match e1 with
           | A.Int, _ -> L.build_add e1' e2' "tmp" builder
@@ -186,19 +214,23 @@ let translate program =
           | _ -> failwith "unreachable" )
         | And -> L.build_and e1' e2' "tmp" builder
         | Or -> L.build_or e1' e2' "tmp" builder
-        (* TODO: PLACEHOLDERS *)
-        | UMinus | Cat | Cons | Head | Tail | Not -> failwith "unreachable" )
+        | Cat -> L.build_call catList_f [| e1' ; e2' |] "catList" builder
+        | Cons ->  L.build_call consList_f [| e1' ; e2' |] "consList" builder
+        | _ -> failwith "unreachable")
+
     | SUnaryOp (op, e1) ->
         let e1' = build_expr e1 var_table the_function builder in
-        ( match op with
+        (match op with
         | UMinus -> (
           match e1 with
-          | A.Int, _ -> L.build_neg
-          | A.Float, _ -> L.build_fneg
+          | A.Int, _ -> L.build_neg e1' "tmp" builder
+          | A.Float, _ -> L.build_fneg e1' "tmp" builder
           | _ -> failwith "unreachable" )
-        | Not -> L.build_not
-        | _ -> failwith "unreachable" )
-          e1' "tmp" builder
+        | Not -> L.build_not e1' "tmp" builder
+        | Head -> L.build_call getHead_f [| e1' |] "getHead" builder
+        | Tail -> L.build_call getTail_f [| e1' |] "getTail" builder
+        | _ -> failwith "unreachable")
+
     | SCondExp (condition, e1, e2) ->
         let res = L.build_alloca (ltype_of_typ t) "cond-res" builder in
         let bool_val = build_expr condition var_table the_function builder in

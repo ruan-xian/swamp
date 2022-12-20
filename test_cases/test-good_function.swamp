@@ -1,5 +1,0 @@
-0=| Expected value: Not implemented |=0
-0=| did not implement function things in calc.ml so expected value is not correct |=0
-let f1 = fun(x:int, y:(int, list<char> -> int)) -> let c = 2 in c * x in
-let f3(f1:float, b:float) = f1 - b + 1.5 in
-f1

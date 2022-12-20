@@ -4,4 +4,4 @@ let f2 = fun() -> 2 * (3 + 4) in
 let f3(x:int) = x - 3 + 1 in
 
 let k = f1(2, 3) in
-k + (fun(x:int) -> x * x)(2)
+shreksays(int_to_string(k + (fun(x:int) -> x * x)(2)))

@@ -1,2 +1,2 @@
 0=| Expected value: "Get out of my swamp!" |=0
-let x = "Get out of my swamp!" in x
+let x = "Get out of my swamp!" in shreksays(x)

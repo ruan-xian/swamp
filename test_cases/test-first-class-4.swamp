@@ -7,4 +7,4 @@ let h = fun(
 let g2 = fun() -> 2 in
 let f2 = fun(z:( -> int), b:int) ->
 b + (z)() in
-h(f2, g2, 3)
+shreksays(int_to_string(h(f2, g2, 3)))
