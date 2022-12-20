@@ -8,8 +8,8 @@ let onion fibonacci(n: int, a: int, b:int) =
 	if n == 0 then a
 	else 
 		if n == 1 then b
-	else 
-		fibonacci(n - 1, b, a + b)
+		else 
+			fibonacci(n - 1, b, a + b)
 in
 0=| return a list from min to max, inclusive |=0
 let onion count(min: int, max: int) =
