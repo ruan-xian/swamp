@@ -102,33 +102,33 @@ let translate program =
   let appendNode_f : L.llvalue =
     L.declare_function "appendNode" appendNode_t the_module
   in
-  let catList_f : L.lltype =
+  let catList_t : L.lltype =
     L.function_type (L.pointer_type list_t)
       [|L.pointer_type list_t; L.pointer_type list_t|]
   in
   let catList_f : L.llvalue =
-    L.declare_function "catList" appendNode_t the_module
+    L.declare_function "catList" catList_t the_module
   in
-  let consList_f : L.lltype =
+  let consList_t : L.lltype =
     L.function_type (L.pointer_type list_t)
       [|L.pointer_type i8_t; L.pointer_type list_t|]
   in
   let consList_f : L.llvalue =
-    L.declare_function "consList" appendNode_t the_module
+    L.declare_function "consList" consList_t the_module
   in
-  let getHead_f : L.lltype =
+  let getHead_t : L.lltype =
     L.function_type (L.pointer_type i8_t)
       [|L.pointer_type list_t|]
   in
   let getHead_f : L.llvalue =
-    L.declare_function "getHead" appendNode_t the_module
+    L.declare_function "getHead" getHead_t the_module
   in
-  let getTail_f : L.lltype =
+  let getTail_t : L.lltype =
     L.function_type (L.pointer_type list_t)
       [|L.pointer_type list_t|]
   in
   let getTail_f : L.llvalue =
-    L.declare_function "getTail" appendNode_t the_module
+    L.declare_function "getTail" getTail_t the_module
   in
   let concat_t : L.lltype =
     L.function_type (L.pointer_type i8_t)
@@ -157,6 +157,11 @@ let translate program =
     | SInfixOp (e1, op, e2) -> 
         let e1' = build_expr e1 var_table the_function builder
         and e2' = build_expr e2 var_table the_function builder in
+        let get_void e = 
+          let addr = L.build_alloca (L.type_of e) "arg" builder in
+          ignore(L.build_store e addr builder);
+          L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder 
+        in
         (* t1 == t2 bc we semanted *)
         (match op with
         | Add -> (
@@ -220,8 +225,9 @@ let translate program =
           | _ -> failwith "unreachable" )
         | And -> L.build_and e1' e2' "tmp" builder
         | Or -> L.build_or e1' e2' "tmp" builder
-        | Cat -> L.build_call catList_f [| e1' ; e2' |] "catList" builder
-        | Cons ->  L.build_call consList_f [| e1' ; e2' |] "consList" builder
+        | Cat -> 
+            L.build_call catList_f [| e1'; e2' |] "catList" builder
+        | Cons ->  L.build_call consList_f [| get_void(e1'); e2' |] "consList" builder
         | _ -> failwith "unreachable")
 
     | SUnaryOp (op, e1) ->
@@ -233,7 +239,12 @@ let translate program =
           | A.Float, _ -> L.build_fneg e1' "tmp" builder
           | _ -> failwith "unreachable" )
         | Not -> L.build_not e1' "tmp" builder
-        | Head -> L.build_call getHead_f [| e1' |] "getHead" builder
+        | Head -> 
+          let hd = L.build_call getHead_f [| e1' |] "getHead" builder in
+          let ptr = 
+            L.build_bitcast hd (L.pointer_type (ltype_of_typ t)) "voidp" builder 
+          in
+          L.build_load ptr "hd" builder
         | Tail -> L.build_call getTail_f [| e1' |] "getTail" builder
         | _ -> failwith "unreachable")
 
@@ -272,8 +283,8 @@ let translate program =
           | h :: t ->
               let e = build_expr h var_table the_function builder in
               let addr = L.build_alloca (L.type_of e) "arg" builder in
-              let ptr = L.build_store e addr builder in
-              let void_p = L.build_bitcast ptr i8_t "voidp" builder in
+              ignore(L.build_store e addr builder);
+              let void_p = L.build_bitcast addr (L.pointer_type i8_t) "voidp" builder in
               let node = L.build_call newNode_f [|void_p|] "newNode" builder in
               let llst' =
                 L.build_call appendNode_f [|llst; node|] "appendNode" builder
